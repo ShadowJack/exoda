@@ -10,11 +10,11 @@ use Mix.Config
 
 # You can configure your application as:
 #
-#     config :exoda_client, key: :value
+#     config :exoda, key: :value
 #
 # and access this configuration in your application as:
 #
-#     Application.get_env(:exoda_client, :key)
+#     Application.get_env(:exoda, :key)
 #
 # You can also configure a 3rd-party app:
 #
