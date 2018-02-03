@@ -1,10 +1,10 @@
 defmodule Exoda do
+  require Logger
+
   @moduledoc """
   An implementation of `Ecto.Adapter` that can be used
   to access remote endpoints supporting OData v4 protocol
   """
-
-  require Logger
 
   @typep options :: Keyword.t()
   @typep repo :: Ecto.Repo.t()
