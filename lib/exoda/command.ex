@@ -45,6 +45,9 @@ defmodule Exoda.Command do
           options
         ) :: {:ok, fields()} | {:invalid, constraints()} | no_return
   def insert(repo, schema_meta, fields, on_conflict, returning, opts) do
+    #TODO: create a new entry with id passed in the request
+    # Header 'Prefer: return=minimal' should be passed
+    # Response should be equal to 204 or 201 and contain Location header with url to the created entry
     raise "Not implemented"
   end
 
