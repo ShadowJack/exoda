@@ -1,4 +1,6 @@
 defmodule Exoda.Types do
+  require Logger
+
   @moduledoc """
   Module contains a part of implementation of `Ecto.Adapter` behaviour
   related to types convertion.
@@ -19,7 +21,13 @@ defmodule Exoda.Types do
           (term -> {:ok, term} | :error) | Ecto.Type.t()
         ]
   def loaders(:binary_id, type), do: [Ecto.UUID, type]
+  def loaders(:utc_datetime, type), do: [&datetime_decode/1, type]
   def loaders(_primitive, type), do: [type]
+
+  defp datetime_decode(datetime) do
+    erl_datetime = NaiveDateTime.from_iso8601!(datetime) |> NaiveDateTime.to_erl()
+    {:ok, erl_datetime}
+  end
 
   @doc """
   Returns the dumpers for a given type.
@@ -34,7 +42,13 @@ defmodule Exoda.Types do
           (term -> {:ok, term} | :error) | Ecto.Type.t()
         ]
   def dumpers(:binary_id, type), do: [type, Ecto.UUID]
+  def dumpers(:utc_datetime, type), do: [type, &datetime_encode/1]
   def dumpers(_primitive, type), do: [type]
+
+  defp datetime_encode({{year, month, day}, {hour, minute, second, microsecond}}) do
+    datetime = NaiveDateTime.from_erl!({{year, month, day}, {hour, minute, second}}, {microsecond, 6}) |> NaiveDateTime.to_iso8601()
+    {:ok, "#{datetime}Z"}
+  end
 
   #
   ## Autogenerate

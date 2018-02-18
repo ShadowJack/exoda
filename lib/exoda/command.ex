@@ -1,4 +1,7 @@
 defmodule Exoda.Command do
+  require Logger
+  alias Exoda.Client
+
   @moduledoc """
   Module contains a part of implementation of `Ecto.Adapter` behaviour
   related to creating/updating/deleting data.
@@ -38,17 +41,69 @@ defmodule Exoda.Command do
   """
   @spec insert(
           repo,
-          schema_meta(),
-          fields(),
-          on_conflict(),
-          returning(),
+          schema_meta,
+          fields,
+          on_conflict,
+          returning,
           options
-        ) :: {:ok, fields()} | {:invalid, constraints()} | no_return
-  def insert(repo, schema_meta, fields, on_conflict, returning, opts) do
-    #TODO: create a new entry with id passed in the request
-    # Header 'Prefer: return=minimal' should be passed
-    # Response should be equal to 204 or 201 and contain Location header with url to the created entry
-    raise "Not implemented"
+        ) :: {:ok, fields} | {:error, any} | {:invalid, constraints} | no_return
+  def insert(repo, schema_meta, fields, _on_conflict, returning, opts) do
+    Logger.debug("""
+    repo: #{inspect(repo)}, 
+    meta: #{inspect(schema_meta)},
+    fields: #{inspect(fields)},
+    returning: #{inspect(returning)},
+    opts: #{inspect(opts)}
+    """)
+
+    {_, resource} = schema_meta.source
+    {:ok, body} = build_body(fields)
+    Logger.debug("Request body: #{inspect(body)}")
+    return_preference = if Enum.empty?(returning), do: "minimal", else: "representation"
+    headers = [
+      {"Prefer", "return=#{return_preference}"},
+      {"Content-Type", "application/json"},
+      {"Accept", "application/json"}
+    ]
+
+    case Client.post(resource, body, headers) do
+      {:ok, response} -> 
+        Logger.debug("Response: #{inspect(response)}")
+        build_insert_response(response, returning)
+      {:error, reason} -> 
+        Logger.error("Failed request: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  @spec build_body(fields) :: String.t
+  defp build_body(fields) do
+    fields
+    |> Enum.reduce(%{}, fn({name, value}, acc) -> Map.put(acc, name, value) end)
+    |> Jason.encode()
+  end
+
+  @spec build_insert_response(HTTPoison.Response.t, returning) 
+    :: {:ok, fields} | {:error, any} | {:invalid, constraints} | no_return
+  defp build_insert_response(%HTTPoison.Response{body: body, status_code: 201}, returning) do
+    parsed = Jason.decode!(body)
+    fields =
+      returning
+      |> Enum.map(fn name -> 
+        case Map.fetch(parsed, name) do
+          {:ok, value} -> {name, value}
+          :error -> nil
+        end
+      end)
+      |> Enum.reject(&(&1 == nil))
+    {:ok, fields}
+  end
+  defp build_insert_response(%HTTPoison.Response{status_code: 204}, _returning) do
+    {:ok, []}
+  end
+  defp build_insert_response(%HTTPoison.Response{body: body, status_code: status_code}, _returning) do
+    #TODO: parse constraints?
+    {:error, "Error inserting to remote OData server.\nStatus code: #{status_code}.\nResponse body: #{body}"}
   end
 
   @doc """

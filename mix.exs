@@ -27,7 +27,9 @@ defmodule Exoda.MixProject do
     [
       {:ecto, "~> 2.2.0"},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
-      {:httpoison, "~> 1.0.0"}
+      {:httpoison, "~> 1.0.0"},
+      {:jason, "~> 1.0"},
+      {:sweet_xml, "~> 0.6.5"},
     ]
   end
 
