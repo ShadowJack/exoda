@@ -17,15 +17,19 @@ defmodule Exoda do
   @impl true
   @spec ensure_all_started(repo, type :: :application.restart_type()) ::
           {:ok, [atom]} | {:error, atom}
-  def ensure_all_started(_repo, _type) do
-    # TODO: ensure logger, httpClient and other required apps are started
-    {:ok, []}
+  def ensure_all_started(_repo, type) do
+    with {:ok, _} <- Application.ensure_all_started(:httpoison, type),
+         {:ok, _} <- Application.ensure_all_started(:logger, type) do
+      {:ok, [:httpoison, :logger]}
+    else
+      {:error, {app, _}} -> {:error, app}
+    end
   end
 
   @doc false
   @impl true
   @spec child_spec(repo, options) :: :supervisor.child_spec()
-  defdelegate child_spec(repo, opts), to: Exoda.Client
+  defdelegate child_spec(repo, opts), to: Exoda.ServiceDescription
 
   #
   ## Types

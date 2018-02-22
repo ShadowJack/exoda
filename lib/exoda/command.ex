@@ -1,6 +1,5 @@
 defmodule Exoda.Command do
   require Logger
-  alias Exoda.Client
 
   @moduledoc """
   Module contains a part of implementation of `Ecto.Adapter` behaviour
@@ -15,6 +14,8 @@ defmodule Exoda.Command do
   @typep returning :: Ecto.Adapter.returning()
   @typep filters :: Ecto.Adapter.filters()
   @typep constraints :: Ecto.Adapter.constraints()
+
+  @client Application.get_env(:exoda, :client, Exoda.Client.Http)
   
   @doc """
   Creates multiple entries in the OData server
@@ -56,7 +57,7 @@ defmodule Exoda.Command do
     opts: #{inspect(opts)}
     """)
 
-    {_, resource} = schema_meta.source
+    {_, source_path} = schema_meta.source
     {:ok, body} = build_body(fields)
     Logger.debug("Request body: #{inspect(body)}")
     return_preference = if Enum.empty?(returning), do: "minimal", else: "representation"
@@ -66,7 +67,8 @@ defmodule Exoda.Command do
       {"Accept", "application/json"}
     ]
 
-    case Client.post(resource, body, headers) do
+    %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
+    case @client.post("#{service_url}/#{source_path}", body, headers) do
       {:ok, response} -> 
         Logger.debug("Response: #{inspect(response)}")
         build_insert_response(response, returning)
@@ -105,6 +107,7 @@ defmodule Exoda.Command do
     #TODO: parse constraints?
     {:error, "Error inserting to remote OData server.\nStatus code: #{status_code}.\nResponse body: #{body}"}
   end
+
 
   @doc """
   Updates a single entity with the given filters.
