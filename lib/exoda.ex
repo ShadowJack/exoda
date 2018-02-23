@@ -46,7 +46,6 @@ defmodule Exoda do
   @impl true
   defdelegate autogenerate(id_type), to: Exoda.Types
 
-
   #
   ## Queries
 
@@ -56,15 +55,15 @@ defmodule Exoda do
 
   @doc false
   @impl true
-  defdelegate execute(repo, query_meta, query, params, process, opts), to: Exoda.Query 
-
+  defdelegate execute(repo, query_meta, query, params, process, opts), to: Exoda.Query
 
   #
   # Commands
 
   @doc false
   @impl true
-  defdelegate insert_all(repo, schema_meta, header, fields_list, on_conflict, returning, opts), to: Exoda.Command
+  defdelegate insert_all(repo, schema_meta, header, fields_list, on_conflict, returning, opts),
+    to: Exoda.Command
 
   @doc false
   @impl true

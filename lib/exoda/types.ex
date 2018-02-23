@@ -5,7 +5,7 @@ defmodule Exoda.Types do
   Module contains a part of implementation of `Ecto.Adapter` behaviour
   related to types convertion.
   """
-  
+
   @doc """
   Returns the loaders for a given type.
 
@@ -46,7 +46,10 @@ defmodule Exoda.Types do
   def dumpers(_primitive, type), do: [type]
 
   defp datetime_encode({{year, month, day}, {hour, minute, second, microsecond}}) do
-    datetime = NaiveDateTime.from_erl!({{year, month, day}, {hour, minute, second}}, {microsecond, 6}) |> NaiveDateTime.to_iso8601()
+    datetime =
+      NaiveDateTime.from_erl!({{year, month, day}, {hour, minute, second}}, {microsecond, 6})
+      |> NaiveDateTime.to_iso8601()
+
     {:ok, "#{datetime}Z"}
   end
 

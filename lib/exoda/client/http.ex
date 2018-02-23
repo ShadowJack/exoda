@@ -8,7 +8,6 @@ defmodule Exoda.Client.Http do
 
   @behaviour Exoda.Client
 
-
   @impl true
   defdelegate request(method, url, body \\ "", headers \\ [], opts \\ []), to: HTTPoison
 

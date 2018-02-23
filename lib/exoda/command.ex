@@ -16,7 +16,7 @@ defmodule Exoda.Command do
   @typep constraints :: Ecto.Adapter.constraints()
 
   @client Application.get_env(:exoda, :client, Exoda.Client.Http)
-  
+
   @doc """
   Creates multiple entries in the OData server
   """
@@ -61,6 +61,7 @@ defmodule Exoda.Command do
     {:ok, body} = build_body(fields)
     Logger.debug("Request body: #{inspect(body)}")
     return_preference = if Enum.empty?(returning), do: "minimal", else: "representation"
+
     headers = [
       {"Prefer", "return=#{return_preference}"},
       {"Content-Type", "application/json"},
@@ -68,46 +69,57 @@ defmodule Exoda.Command do
     ]
 
     %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
+
     case @client.post("#{service_url}/#{source_path}", body, headers) do
-      {:ok, response} -> 
+      {:ok, response} ->
         Logger.debug("Response: #{inspect(response)}")
         build_insert_response(response, returning)
-      {:error, reason} -> 
+
+      {:error, reason} ->
         Logger.error("Failed request: #{inspect(reason)}")
         {:error, reason}
     end
   end
 
-  @spec build_body(fields) :: String.t
+  @spec build_body(fields) :: String.t()
   defp build_body(fields) do
     fields
-    |> Enum.reduce(%{}, fn({name, value}, acc) -> Map.put(acc, name, value) end)
+    |> Enum.reduce(%{}, fn {name, value}, acc -> Map.put(acc, name, value) end)
     |> Jason.encode()
   end
 
-  @spec build_insert_response(HTTPoison.Response.t, returning) 
-    :: {:ok, fields} | {:error, any} | {:invalid, constraints} | no_return
+  @spec build_insert_response(HTTPoison.Response.t(), returning) ::
+          {:ok, fields} | {:error, any} | {:invalid, constraints} | no_return
   defp build_insert_response(%HTTPoison.Response{body: body, status_code: 201}, returning) do
     parsed = Jason.decode!(body)
+
     fields =
       returning
-      |> Enum.map(fn name -> 
+      |> Enum.map(fn name ->
         case Map.fetch(parsed, name) do
           {:ok, value} -> {name, value}
           :error -> nil
         end
       end)
       |> Enum.reject(&(&1 == nil))
+
     {:ok, fields}
   end
+
   defp build_insert_response(%HTTPoison.Response{status_code: 204}, _returning) do
     {:ok, []}
   end
-  defp build_insert_response(%HTTPoison.Response{body: body, status_code: status_code}, _returning) do
-    #TODO: parse constraints?
-    {:error, "Error inserting to remote OData server.\nStatus code: #{status_code}.\nResponse body: #{body}"}
-  end
 
+  defp build_insert_response(
+         %HTTPoison.Response{body: body, status_code: status_code},
+         _returning
+       ) do
+    # TODO: parse constraints?
+    {:error,
+     "Error inserting to remote OData server.\nStatus code: #{status_code}.\nResponse body: #{
+       body
+     }"}
+  end
 
   @doc """
   Updates a single entity with the given filters.

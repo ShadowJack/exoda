@@ -12,7 +12,6 @@ defmodule Exoda.Query do
   @typep process :: Ecto.Adapter.process()
   @typep cached :: Ecto.Adapter.cached()
 
-  
   @doc """
   Commands invoked to prepare a query for `all`, `update_all` and `delete_all`.
 
@@ -39,11 +38,12 @@ defmodule Exoda.Query do
   expected Ecto type. The `process` function will be nil if no
   result set is expected from the query.
   """
-  @callback execute(repo, query_meta, query, params :: list(), process | nil, options) :: result when
-              result: {integer, [[term]] | nil} | no_return,
-              query: {:nocache, prepared} |
-                     {:cached, (prepared -> :ok), cached} |
-                     {:cache, (cached -> :ok), prepared}
+  @callback execute(repo, query_meta, query, params :: list(), process | nil, options) :: result
+            when result: {integer, [[term]] | nil} | no_return,
+                 query:
+                   {:nocache, prepared}
+                   | {:cached, (prepared -> :ok), cached}
+                   | {:cache, (cached -> :ok), prepared}
   def execute(repo, query_meta, query, params, process, opts) do
     raise "Not implemented"
   end

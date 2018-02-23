@@ -27,8 +27,7 @@ defmodule Exoda.Schema do
   """
   defmacro odata_type(type) do
     quote do
-      field :odata_type, :string, source: "@odata.type", default: unquote(type)
+      field(:odata_type, :string, source: "@odata.type", default: unquote(type))
     end
   end
-
 end

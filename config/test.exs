@@ -1,4 +1,8 @@
 use Mix.Config
 
-#TODO: use Mox to make a stub on the fly
-config :exoda, :client, Exoda.Client.Http
+config :exoda, :client, Exoda.ClientMock
+
+# Configure mock repo
+config :exoda, Exoda.RepoMock,
+  adapter: Exoda,
+  url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc"
