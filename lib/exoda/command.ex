@@ -57,20 +57,9 @@ defmodule Exoda.Command do
     opts: #{inspect(opts)}
     """)
 
-    {_, source_path} = schema_meta.source
-    {:ok, body} = build_body(fields)
-    Logger.debug("Request body: #{inspect(body)}")
-    return_preference = if Enum.empty?(returning), do: "minimal", else: "representation"
+    {url, body, headers} = prepare_insert_request(schema_meta, fields, returning)
 
-    headers = [
-      {"Prefer", "return=#{return_preference}"},
-      {"Content-Type", "application/json"},
-      {"Accept", "application/json"}
-    ]
-
-    %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
-
-    case @client.post("#{service_url}/#{source_path}", body, headers) do
+    case @client.post(url, body, headers) do
       {:ok, response} ->
         Logger.debug("Response: #{inspect(response)}")
         build_insert_response(response, returning)
@@ -79,6 +68,24 @@ defmodule Exoda.Command do
         Logger.error("Failed request: #{inspect(reason)}")
         {:error, reason}
     end
+  end
+
+  @spec prepare_insert_request(schema_meta, fields, returning) :: {String.t, String.t, HTTPoison.headers}
+  defp prepare_insert_request(schema_meta, fields, returning) do
+    %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
+    {_, source_path} = schema_meta.source
+    url = "#{service_url}/#{source_path}"
+
+    {:ok, body} = build_body(fields)
+
+    return_preference = if Enum.empty?(returning), do: "minimal", else: "representation"
+    headers = [
+      {"Prefer", "return=#{return_preference}"},
+      {"Content-Type", "application/json"},
+      {"Accept", "application/json"}
+    ]
+
+    {url, body, headers}
   end
 
   @spec build_body(fields) :: String.t()

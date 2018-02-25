@@ -1,5 +1,6 @@
 defmodule ExodaCommandTest do
-  use ExUnit.Case, async: true
+  use Exoda.BaseCase, async: true
+  # use ExUnit.Case, async: true
   alias Exoda.Command, as: Cmd
 
   describe "insert one entry" do

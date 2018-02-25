@@ -2,8 +2,6 @@ defmodule Exoda.BaseCase do
   use ExUnit.CaseTemplate
 
   setup_all do
-    Mox.defmock(Exoda.ClientMock, for: Exoda.Client)
-    Mox.defmock(Exoda.RepoMock, for: Ecto.Repo)
     Mox.set_mox_global()
 
     # Setup stubs for basic OData server endpoints
