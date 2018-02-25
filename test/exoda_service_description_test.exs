@@ -1,55 +1,8 @@
 defmodule ExodaClientTest do
-  use ExUnit.Case, async: true
-  alias Exoda.{ServiceDescription, ClientMock}
+  use Exoda.BaseCase, async: true
+  alias Exoda.{ServiceDescription}
 
   @valid_opts [repo: Exoda.RepoMock, otp_app: :exoda]
-
-  setup do
-    # Setup basic stubs
-    {:ok, service_url} = Application.get_env(:exoda, Exoda.RepoMock) |> Keyword.fetch(:url)
-
-    Mox.stub(ClientMock, :get!, fn url, _, _ ->
-      cond do
-        url == service_url ->
-          %HTTPoison.Response{
-            status_code: 200,
-            body: File.read!("test/stub_data/OData.svc.json"),
-            headers: [
-              {"Content-Type",
-               "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
-              {"OData-Version", "4.0;"},
-              {"Access-Control-Allow-Origin", "*"},
-              {"Access-Control-Allow-Methods", "GET"},
-              {"Access-Control-Allow-Headers",
-               "Accept, Origin, Content-Type, MaxDataServiceVersion"},
-              {"Access-Control-Expose-Headers", "DataServiceVersion"}
-            ]
-          }
-
-        String.ends_with?(url, "$metadata") ->
-          %HTTPoison.Response{
-            status_code: 200,
-            body: File.read!("test/stub_data/OData_metadata.xml"),
-            headers: [
-              {"Content-Length", "7147"},
-              {"Content-Type", "application/xml;charset=utf-8"},
-              {"X-Content-Type-Options", "nosniff"},
-              {"OData-Version", "4.0;"},
-              {"Access-Control-Allow-Origin", "*"},
-              {"Access-Control-Allow-Methods", "GET"},
-              {"Access-Control-Allow-Headers",
-               "Accept, Origin, Content-Type, MaxDataServiceVersion"},
-              {"Access-Control-Expose-Headers", "DataServiceVersion"}
-            ]
-          }
-
-        :otherwise ->
-          %HTTPoison.Response{status_code: 404}
-      end
-    end)
-
-    Mox.set_mox_global()
-  end
 
   test "service description process is successfully started" do
     assert {:ok, _} = ServiceDescription.start_link(@valid_opts)
