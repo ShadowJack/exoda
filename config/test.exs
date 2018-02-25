@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :exoda, :client, Exoda.ClientMock
+config :exoda, :client, Exoda.Fakes.Client
 
 # Configure mock repo
 config :exoda, Exoda.RepoMock,

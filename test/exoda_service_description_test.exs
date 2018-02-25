@@ -1,5 +1,5 @@
 defmodule ExodaClientTest do
-  use Exoda.BaseCase, async: true
+  use ExUnit.Case, async: true
   alias Exoda.{ServiceDescription}
 
   @valid_opts [repo: Exoda.RepoMock, otp_app: :exoda]

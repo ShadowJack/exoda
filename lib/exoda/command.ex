@@ -49,7 +49,7 @@ defmodule Exoda.Command do
           options
         ) :: {:ok, fields} | {:error, any} | {:invalid, constraints} | no_return
   def insert(repo, schema_meta, fields, _on_conflict, returning, opts) do
-    Logger.debug("""
+    Logger.info("""
     repo: #{inspect(repo)}, 
     meta: #{inspect(schema_meta)},
     fields: #{inspect(fields)},
