@@ -1,4 +1,6 @@
 defmodule Exoda.Fakes.Client do
+  alias HTTPoison.Response
+
   @behaviour Exoda.Client
 
   @impl true
@@ -15,18 +17,28 @@ defmodule Exoda.Fakes.Client do
 
   @impl true
   def post(url, _ \\ "", headers \\ [], _ \\ []) do
-    preference_header = headers |> Enum.find(fn {name, _value} -> name == "Preference" end)
+    preference_header = get_preference_header(headers)
     cond do
       String.ends_with?(url, "Products") -> post_product_response(preference_header)
       :otherwise -> not_found_response()
     end
   end
 
+  @impl true
+  def patch(url, _ \\ "", headers \\ [], _ \\ []) do
+    preference_header = get_preference_header(headers)
+    patch_product_response(preference_header)
+  end
 
+
+
+  defp get_preference_header(headers) do
+    headers |> Enum.find_value(fn {name, value} -> if name == "Preference", do: value, else: nil end)
+  end
 
   # Get service information
   defp get_service_response() do
-    %HTTPoison.Response{
+    %Response{
       status_code: 200,
       body: File.read!("test/stub_data/OData.svc.json"),
       headers: [
@@ -38,7 +50,7 @@ defmodule Exoda.Fakes.Client do
 
   # Get service metadata
   defp get_metadata_response() do
-    %HTTPoison.Response{
+    %Response{
       status_code: 200,
       body: File.read!("test/stub_data/OData_metadata.xml"),
       headers: [
@@ -49,14 +61,14 @@ defmodule Exoda.Fakes.Client do
   end
 
   defp not_found_response() do
-    %HTTPoison.Response{status_code: 404}   
+    %Response{status_code: 404}   
   end
 
   # Create a new entity
   defp post_product_response("return=minimal") do
     {
       :ok,
-      %HTTPoison.Response{
+      %Response{
         body: "",
         headers: [
           {"Location", "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(1)"},
@@ -72,7 +84,7 @@ defmodule Exoda.Fakes.Client do
   defp post_product_response(_) do
     {
       :ok,
-      %HTTPoison.Response{
+      %Response{
         body: "{\"@odata.context\":\"http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products/$entity\",\"ID\":1,\"Name\":\"some name\",\"Description\":\"some description\",\"ReleaseDate\":\"2010-04-17T13:05:50.555Z\",\"DiscontinuedDate\":\"2010-04-17T10:20:30.4Z\",\"Rating\":42,\"Price\":120.5}",
         headers: [
           {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
@@ -82,6 +94,39 @@ defmodule Exoda.Fakes.Client do
         ],
         request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products",
         status_code: 201
+      }
+    }
+  end
+
+  # Update existing entity
+  defp patch_product_response("return=minimal") do
+    {
+      :ok,
+      %Response{
+        body: "",
+        headers: [
+          {"Location", "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(1)"},
+          {"Preference-Applied", "return=minimal"},
+          {"OData-Version", "4.0;"},
+          {"OData-EntityId", "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(1)"}
+        ],
+        request_url: "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(1)",
+        status_code: 204
+      }
+    }
+  end
+  defp patch_product_response(_) do
+    {
+      :ok,
+      %Response{
+           body: "{\"@odata.context\":\"http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products/$entity\",\"ID\":1,\"Name\":\"Updated name\",\"Description\":\"Low fat milk\",\"ReleaseDate\":\"1995-10-01T00:00:00Z\",\"DiscontinuedDate\":null,\"Rating\":3,\"Price\":3.5}",
+        headers: [
+          {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
+          {"Preference-Applied", "return=representation"},
+          {"OData-Version", "4.0;"}
+        ],
+        request_url: "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(1)",
+        status_code: 200
       }
     }
   end
