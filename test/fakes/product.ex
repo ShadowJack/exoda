@@ -1,6 +1,7 @@
 defmodule Exoda.Fakes.Product do
   use Exoda.Schema
   import Ecto.Changeset
+  import Exoda.Changeset
   alias Exoda.Fakes.Product
 
 
@@ -20,5 +21,6 @@ defmodule Exoda.Fakes.Product do
     product
     |> cast(attrs, [:id, :name, :description, :release_date, :discontinued_date, :rating, :price])
     |> validate_required([:id, :release_date])
+    |> add_odata_type(@odata_type)
   end
 end

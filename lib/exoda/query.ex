@@ -1,4 +1,6 @@
 defmodule Exoda.Query do
+  require Logger
+
   @moduledoc """
   Module contains a part of implementation of `Ecto.Adapter` behaviour
   related to querying data.
@@ -20,6 +22,14 @@ defmodule Exoda.Query do
   @spec prepare(atom :: :all | :update_all | :delete_all, query) ::
           {:cache, prepared} | {:nocache, prepared}
   def prepare(query_type, query) do
+    Logger.info(
+      """
+
+      Prepare query.
+      Query type: #{inspect(query_type)}
+      Query: #{inspect(query)}
+      """
+    )
     raise "Not implemented"
   end
 

@@ -30,6 +30,11 @@ defmodule Exoda.Fakes.Client do
     patch_product_response(preference_header)
   end
 
+  @impl true
+  def delete(_url, _ \\ "", _headers \\ [], _ \\ []) do
+    delete_product_response()
+  end
+
 
 
   defp get_preference_header(headers) do
@@ -127,6 +132,20 @@ defmodule Exoda.Fakes.Client do
         ],
         request_url: "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(1)",
         status_code: 200
+      }
+    }
+  end
+
+  defp delete_product_response() do
+    {
+      :ok, 
+      %HTTPoison.Response{
+        body: "",
+        headers: [
+          {"OData-Version", "4.0;"},
+        ],
+        request_url: "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/Products(0)",
+        status_code: 204
       }
     }
   end

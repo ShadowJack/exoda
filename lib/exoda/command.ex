@@ -107,7 +107,7 @@ defmodule Exoda.Command do
   def update(_repo, schema_meta, fields, filters, returning, _opts) do
     Logger.debug("Fields: #{inspect(fields)}, filters: #{inspect(filters)}, schema_meta: #{inspect(schema_meta)}")
     
-    with {:ok, url} <- build_update_url(schema_meta, filters),
+    with {:ok, url} <- build_id_url(schema_meta, filters),
          {:ok, body} <- build_body(fields),
          {:ok, headers} <- build_headers(returning),
          {:ok, response} <- @client.patch(url, body, headers) do
@@ -119,8 +119,38 @@ defmodule Exoda.Command do
     end
   end
 
-  @spec build_update_url(schema_meta, filters) :: {:ok, String.t} | {:error, :stale}
-  defp build_update_url(schema_meta, filters) do
+
+
+  @doc """
+  Deletes a single entity with the given filters.
+
+  While `filters` can be any record column, it is expected that
+  at least the primary key (or any other key that uniquely
+  identifies an existing record) be given as a filter. Therefore,
+  in case there is no record matching the given filters,
+  `{:error, :stale}` is returned.
+  """
+  @spec delete(repo, schema_meta(), filters(), options) ::
+          {:ok, fields()}
+          | {:invalid, constraints()}
+          | {:error, :stale}
+          | no_return
+  def delete(_repo, schema_meta, filters, _opts) do
+    with {:ok, url} <- build_id_url(schema_meta, filters),
+         {:ok, response} <- @client.delete(url) do
+      parse_response(response, [])
+    else
+      {:error, reason} -> 
+        Logger.error("Error deleting entry: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+
+  ## Private
+  #
+  @spec build_id_url(schema_meta, filters) :: {:ok, String.t} | {:error, :stale}
+  defp build_id_url(schema_meta, filters) do
     case get_primary_key(schema_meta, filters) do
       {_, nil} -> 
         {:error, :stale}
@@ -157,29 +187,6 @@ defmodule Exoda.Command do
       end)
     {pk_type, pk_value}
   end
-
-
-  @doc """
-  Deletes a single entity with the given filters.
-
-  While `filters` can be any record column, it is expected that
-  at least the primary key (or any other key that uniquely
-  identifies an existing record) be given as a filter. Therefore,
-  in case there is no record matching the given filters,
-  `{:error, :stale}` is returned.
-  """
-  @spec delete(repo, schema_meta(), filters(), options) ::
-          {:ok, fields()}
-          | {:invalid, constraints()}
-          | {:error, :stale}
-          | no_return
-  def delete(repo, schema_meta, filters, opts) do
-    raise "Not implemented"
-  end
-
-
-  ## Private
-  #
   @spec build_headers(returning) :: {:ok, HTTPoison.headers}
   defp build_headers(returning) do
     return_preference = if returning == [], do: "minimal", else: "representation"
