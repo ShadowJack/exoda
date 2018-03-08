@@ -33,8 +33,7 @@ defmodule Exoda.MixProject do
       {:ex_doc, "~> 0.16", only: :dev, runtime: false},
       {:httpoison, "~> 1.0.0"},
       {:jason, "~> 1.0"},
-      {:sweet_xml, "~> 0.6.5"},
-      {:mox, "~> 0.3", only: :test}
+      {:sweet_xml, "~> 0.6.5"}
     ]
   end
 

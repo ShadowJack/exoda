@@ -138,6 +138,7 @@ defmodule Exoda.Command do
   def delete(_repo, schema_meta, filters, _opts) do
     with {:ok, url} <- build_id_url(schema_meta, filters),
          {:ok, response} <- @client.delete(url) do
+      Logger.info(url)
       parse_response(response, [])
     else
       {:error, reason} -> 

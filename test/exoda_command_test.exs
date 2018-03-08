@@ -1,10 +1,10 @@
 defmodule ExodaCommandTest do
   use ExUnit.Case, async: false
   alias Exoda.Command, as: Cmd
-  alias Exoda.RepoMock
+  alias Exoda.Fakes.Repo
 
   setup_all do
-    startup_opts = [repo: RepoMock, otp_app: :exoda]
+    startup_opts = [repo: Repo, otp_app: :exoda]
     {:ok, _} = start_supervised({Exoda.ServiceDescription, startup_opts})
     :ok
   end
@@ -31,35 +31,35 @@ defmodule ExodaCommandTest do
 
   describe "insert one entry" do
     test "valid entry is successfully created" do
-      assert {:ok, _response} = Cmd.insert(RepoMock, @schema_meta, @valid_fields, nil, @returning, @opts)
+      assert {:ok, _response} = Cmd.insert(Repo, @schema_meta, @valid_fields, nil, @returning, @opts)
     end
 
     test "returning settings are respected" do
-      assert {:ok, [{"ID", _id}]} = Cmd.insert(RepoMock, @schema_meta, @valid_fields, nil, ["ID"], @opts)
+      assert {:ok, [{"ID", _id}]} = Cmd.insert(Repo, @schema_meta, @valid_fields, nil, ["ID"], @opts)
     end
 
     test "if returning is not required, nothing is returned" do
-      assert {:ok, []} = Cmd.insert(RepoMock, @schema_meta, @valid_fields, nil, [], @opts)
+      assert {:ok, []} = Cmd.insert(Repo, @schema_meta, @valid_fields, nil, [], @opts)
     end
   end
 
 
   describe "update one entry" do
     test "valid entry is successfully updated" do
-      assert {:ok, updated} = Cmd.update(RepoMock, @schema_meta, [{"Name", "Updated name"}], [{"ID", 1 }], @returning, @opts)
+      assert {:ok, updated} = Cmd.update(Repo, @schema_meta, [{"Name", "Updated name"}], [{"ID", 1 }], @returning, @opts)
       assert Map.new(updated) |> Map.fetch!("Name") == "Updated name"
     end
 
     test "returning settings are respected" do
-      assert {:ok, [{"ID", 1}]} == Cmd.update(RepoMock, @schema_meta, @valid_fields, [{"ID", 1 }], ["ID"], @opts)
+      assert {:ok, [{"ID", 1}]} == Cmd.update(Repo, @schema_meta, @valid_fields, [{"ID", 1 }], ["ID"], @opts)
     end
 
     test "if returning is not required, nothing is returned" do
-      assert {:ok, []} == Cmd.update(RepoMock, @schema_meta, @valid_fields, [{"ID", 1}], [], @opts)
+      assert {:ok, []} == Cmd.update(Repo, @schema_meta, @valid_fields, [{"ID", 1}], [], @opts)
     end
 
     test "error is returned when primary key is not passed in the filters" do
-      assert {:error, :stale} == Cmd.update(RepoMock, @schema_meta, @valid_fields, [], [], [])
+      assert {:error, :stale} == Cmd.update(Repo, @schema_meta, @valid_fields, [], [], [])
     end
 
     @tag :skip
@@ -73,11 +73,11 @@ defmodule ExodaCommandTest do
 
   describe "delete one entry" do
     test "entry is successfully deleted" do
-      assert {:ok, _} = Cmd.delete(RepoMock, @schema_meta, [{"ID", 1 }], [])
+      assert {:ok, _} = Cmd.delete(Repo, @schema_meta, [{"ID", 1 }], [])
     end
   
     test "error is returned when primary key is not passed in the filters" do
-      assert {:error, :stale} == Cmd.delete(RepoMock, @schema_meta, [], [])
+      assert {:error, :stale} == Cmd.delete(Repo, @schema_meta, [], [])
     end
   
     @tag :skip

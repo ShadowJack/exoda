@@ -6,12 +6,19 @@ defmodule Exoda.Fakes.Client do
   @impl true
   def get!(url, _ \\ [], _ \\ []) do
     {:ok, service_url} = 
-      Application.get_env(:exoda, Exoda.RepoMock) |> Keyword.fetch(:url)
+      Application.get_env(:exoda, Exoda.Fakes.Repo) |> Keyword.fetch(:url)
 
     cond do
       url == service_url -> get_service_response()
       String.ends_with?(url, "$metadata") -> get_metadata_response()
       :otherwise -> not_found_response()
+    end
+  end
+
+  @impl true
+  def get(url, _ \\ [], _ \\ []) do
+    cond do
+      String.ends_with?(url, "Products") -> get_collection_response()
     end
   end
 
@@ -62,6 +69,23 @@ defmodule Exoda.Fakes.Client do
         {"Content-Type", "application/xml;charset=utf-8"},
         {"OData-Version", "4.0;"}
       ]
+    }
+  end
+
+  # Get collection of products
+  defp get_collection_response() do
+    {:ok, 
+      %Response{
+        status_code: 200,
+        body: File.read!("test/stub_data/products_collection.json"),
+        headers: [
+               {"Cache-Control", "no-cache"},
+               {"Content-Length", "2011"},
+               {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
+               {"OData-Version", "4.0;"},
+        ],
+        request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products",
+      }
     }
   end
 

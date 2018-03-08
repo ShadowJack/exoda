@@ -2,7 +2,7 @@ defmodule ExodaClientTest do
   use ExUnit.Case, async: true
   alias Exoda.{ServiceDescription}
 
-  @valid_opts [repo: Exoda.RepoMock, otp_app: :exoda]
+  @valid_opts [repo: Exoda.Fakes.Repo, otp_app: :exoda]
 
   test "service description process is successfully started" do
     assert {:ok, _} = ServiceDescription.start_link(@valid_opts)
@@ -21,7 +21,7 @@ defmodule ExodaClientTest do
   test "settings are accessible after initialization" do
     {:ok, _} = ServiceDescription.start_link(@valid_opts)
 
-    {:ok, service_url} = Application.get_env(:exoda, Exoda.RepoMock) |> Keyword.fetch(:url)
+    {:ok, service_url} = Application.get_env(:exoda, Exoda.Fakes.Repo) |> Keyword.fetch(:url)
 
     assert %{service_url: ^service_url, namespace: "ODataDemo"} =
              ServiceDescription.get_settings()
