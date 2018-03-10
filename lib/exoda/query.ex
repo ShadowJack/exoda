@@ -1,5 +1,6 @@
 defmodule Exoda.Query do
   require Logger
+  alias Ecto.Query
 
   @moduledoc """
   Module contains a part of implementation of `Ecto.Adapter` behaviour
@@ -59,25 +60,41 @@ defmodule Exoda.Query do
       Params: #{inspect(params)}
       Process: #{inspect(process)}
       Opts: #{inspect(opts)}
+      Query sources: #{inspect(query.sources)}
+      Query select: #{inspect(query.select)}
       """
     )
 
-    with {:ok, url} <- build_url(operation, query, query_meta),
+    with {:ok, url} <- build_url(operation, query),
          {:ok, headers} <- build_headers(operation),
          {:ok, response} <- @client.get(url, headers) do
-      parse_response(response, process, query_meta)
+      parse_response(response, process, query)
     else
       {:error, reason} -> {:error, reason}
     end
   end
 
-  @spec build_url(operation, query, query_meta) :: {:ok, String.t} | {:error, String.t}
-  defp build_url(:all, _query, %{sources: sources}) do
+  @spec build_url(operation, query) :: {:ok, String.t} | {:error, String.t}
+  defp build_url(:all, %Query{sources: sources} = query) do
     %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
     {source_path, _schema} = elem(sources, 0)
-    {:ok, "#{service_url}/#{source_path}"}
+    query_string = build_query_string(query)
+    {:ok, "#{service_url}/#{source_path}#{query_string}"}
   end
-  defp build_url(_, _, _), do: {:error, "Not supported"}
+  defp build_url(_, _), do: {:error, "Not supported"}
+
+  @spec build_query_string(query) :: String.t
+  defp build_query_string(%Ecto.Query{select: %Ecto.Query.SelectExpr{expr: {:&, _, _}}}) do
+    # select full entity
+    ""
+  end
+  defp build_query_string(%Ecto.Query{select: %Ecto.Query.SelectExpr{fields: fields}}) do
+    # select only some fields
+    select = fields
+    |> Enum.map(fn {{:., _, [_, field]}, _, _} -> field end)
+    |> Enum.join(",")
+    "?$select=#{select}" 
+  end
 
   @spec build_headers(operation) :: {:ok, HTTPoison.headers} | {:error, String.t}
   defp build_headers(:all) do
@@ -85,19 +102,19 @@ defmodule Exoda.Query do
   end
   defp build_headers(_), do: {:error, "Not supported"}
 
-  @spec parse_response(HTTPoison.Response.t, process | nil, query_meta) :: {integer, [[term]] | nil}
+  @spec parse_response(HTTPoison.Response.t, process | nil, query) :: {integer, [[term]] | nil}
   defp parse_response(_, nil, _) do
     Logger.warn("Empty process funciton is passed!")
     {0, []}
   end
-  defp parse_response(%HTTPoison.Response{status_code: 200, body: body}, process, query_meta) do
+  defp parse_response(%HTTPoison.Response{status_code: 200, body: body}, process, query) do
     case Jason.decode(body) do
       {:ok, %{"value" => items }} ->
         results = 
           items 
           |> Enum.map(fn item ->
             item 
-            |> preprocess_response(query_meta) 
+            |> preprocess_response(query) 
             |> process.()
           end)
 
@@ -108,11 +125,11 @@ defmodule Exoda.Query do
     end
   end
 
-  # order fields in `item` and add metadata fields if required
-  @spec preprocess_response(Map.t, query_meta) :: List.t
-  defp preprocess_response(item, query_meta) do
-    [{:source, {_, schema}, fields} | _] = query_meta.select.preprocess
-    item = if Enum.any?(fields, fn {f, _} -> f == :odata_type end) do
+  # order fields, extract values and add metadata if required
+  # TODO: support multiple sources
+  @spec preprocess_response(Map.t, query) :: List.t
+  defp preprocess_response(item, %Query{select: select}) do
+    item = if Enum.any?(select.fields, fn {{_, _, [_, f]}, _, _} -> f == "@odata.type" end) do
       Map.put_new(item, "@odata.type", "")
     else
       item
@@ -120,14 +137,14 @@ defmodule Exoda.Query do
 
     item 
     |> Map.to_list() 
-    |> sort_fields(fields, schema)
+    |> sort_fields(select.fields)
     |> Enum.map(fn {_, value} -> value end)
   end
+  defp preprocess_response(item, _query), do: item
 
-  @spec sort_fields(List.t, Keyword.t, atom) :: List.t
-  defp sort_fields(values, fields, schema_mod) do
-    Enum.map(fields, fn {f, _} -> 
-      field_source = schema_mod.__schema__(:field_source, f)
+  @spec sort_fields([any], []) :: [any]
+  defp sort_fields(values, fields) do
+    Enum.map(fields, fn {{_, _, [_, field_source]}, _, _} -> 
       Enum.find(values, {field_source, nil}, fn {name, _} -> name == field_source end)
     end)
   end

@@ -1,0 +1,51 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(Name,Price)",
+  "value": [
+    {
+      "Name": "Bread",
+      "Price": 2.5
+    },
+    {
+      "Name": "Milk",
+      "Price": 3.5
+    },
+    {
+      "Name": "Vint soda",
+      "Price": 20.9
+    },
+    {
+      "Name": "Havina Cola",
+      "Price": 19.9
+    },
+    {
+      "Name": "Fruit Punch",
+      "Price": 22.99
+    },
+    {
+      "Name": "Cranberry Juice",
+      "Price": 22.8
+    },
+    {
+      "Name": "Pink Lemonade",
+      "Price": 18.8
+    },
+    {
+      "Name": "DVD Player",
+      "Price": 35.88
+    },
+    {
+      "Name": "LCD HDTV",
+      "Price": 1088.8
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "Name": "Lemonade",
+      "Price": 1.01
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "Name": "Coffee",
+      "Price": 6.99
+    }
+  ]
+}

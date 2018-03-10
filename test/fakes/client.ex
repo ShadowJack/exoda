@@ -18,6 +18,7 @@ defmodule Exoda.Fakes.Client do
   @impl true
   def get(url, _ \\ [], _ \\ []) do
     cond do
+      String.ends_with?(url, "$select=Name,Price") -> get_collection_select_response()
       String.ends_with?(url, "Products") -> get_collection_response()
     end
   end
@@ -87,6 +88,20 @@ defmodule Exoda.Fakes.Client do
         request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products",
       }
     }
+  end
+
+  # Get collection of products, select only two fields
+  defp get_collection_select_response() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_select.json"),
+        headers: [
+          {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
+          {"OData-Version", "4.0;"}
+        ],
+        request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products?$select=Name,Price",
+        status_code: 200
+      }}
   end
 
   defp not_found_response() do

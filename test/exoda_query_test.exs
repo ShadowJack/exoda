@@ -11,10 +11,14 @@ defmodule ExodaQueryTest do
   test "all entries are successfully fetched" do
     entries = Repo.all(Product)
     assert length(entries) > 0
+    assert %Product{id: _} = hd(entries)
   end
 
-  @tag :skip
   test "select option is restricting returned fields" do
+    query = from p in Product, select: [p.name, p.price]
+    entries = Repo.all(query)
+    assert length(entries) > 0
+    assert Enum.all?(entries, fn arr -> length(arr) == 2 end)
   end
 
   @tag :skip
@@ -59,6 +63,11 @@ defmodule ExodaQueryTest do
 
   @tag :skip
   test "preload option loads associations" do
+  end
+
+  @tag :skip
+  test "select works for several sources" do
+    #TODO: select from preloaded association too
   end
 
   @tag :skip
