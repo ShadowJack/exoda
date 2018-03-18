@@ -54,7 +54,7 @@ defmodule Exoda.ServiceDescription do
   @doc false
   @spec init(options) :: {:ok, term}
   def init(opts) do
-    Logger.info(inspect(opts))
+    Logger.debug(inspect(opts))
 
     with {:ok, repo} <- Keyword.fetch(opts, :repo),
          {:ok, app} <- Keyword.fetch(opts, :otp_app),
@@ -90,8 +90,8 @@ defmodule Exoda.ServiceDescription do
     else
       with {:ok, odata_version} <- extract_odata_verison(response),
            {:ok, meta_url} <- extract_meta_url(response) do
-        Logger.info("OData service #{service_url} has version #{odata_version}")
-        Logger.info("OData service #{service_url} has metadata info at #{meta_url}")
+        Logger.debug("OData service #{service_url} has version #{odata_version}")
+        Logger.debug("OData service #{service_url} has metadata info at #{meta_url}")
         {:ok, %{odata_version: odata_version, meta_url: meta_url}}
       else
         {:error, reason} -> {:error, reason}

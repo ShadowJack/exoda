@@ -1,4 +1,5 @@
 defmodule Exoda.Fakes.Client do
+  require Logger
   alias HTTPoison.Response
 
   @behaviour Exoda.Client
@@ -17,9 +18,18 @@ defmodule Exoda.Fakes.Client do
 
   @impl true
   def get(url, _ \\ [], _ \\ []) do
+    Logger.debug("Url requested: #{url}")
     cond do
-      String.ends_with?(url, "$select=Name,Price") -> get_collection_select_response()
+      String.ends_with?(url, "select=Name") -> get_collection_select_name_response()
+      String.ends_with?(url, "select=Name,Price") -> get_collection_select_name_price_response()
       String.ends_with?(url, "Products") -> get_collection_response()
+      String.ends_with?(url, "filter=(Price%20gt%2020.0)") -> get_collection_filter_gt()
+      String.ends_with?(url, "filter=(Price%20ge%2020.9)") -> get_collection_filter_ge()
+      String.ends_with?(url, "filter=(Price%20lt%2020.0)") -> get_collection_filter_lt()
+      String.ends_with?(url, "filter=(Price%20le%2020.9)") -> get_collection_filter_le()
+      String.ends_with?(url, "filter=(Price%20eq%202.5)") -> get_collection_filter_eq()
+      String.ends_with?(url, "filter=(Price%20ne%202.5)") -> get_collection_filter_ne()
+      String.ends_with?(url, "filter=((Price%20gt%203.0)%20and%20(Name%20eq%20'Milk'))%20and%20(Rating%20le%204)") -> get_collection_filter_several_conditions()
     end
   end
 
@@ -90,16 +100,96 @@ defmodule Exoda.Fakes.Client do
     }
   end
 
-  # Get collection of products, select only two fields
-  defp get_collection_select_response() do
+  # Get collection of products, select only one field
+  defp get_collection_select_name_response() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_select.json"),
+        body: File.read!("test/stub_data/products_collection_select_name.json"),
+        headers: [
+          {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
+          {"OData-Version", "4.0;"}
+        ],
+        request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products?$select=Name",
+        status_code: 200
+      }}
+  end
+
+  # Get collection of products, select only two fields
+  defp get_collection_select_name_price_response() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_select_name_price.json"),
         headers: [
           {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
           {"OData-Version", "4.0;"}
         ],
         request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products?$select=Name,Price",
+        status_code: 200
+      }}
+  end
+
+  # Get collection of products: filter by price
+  defp get_collection_filter_gt() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_gt.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+  defp get_collection_filter_ge() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_ge.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+  defp get_collection_filter_lt() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_lt.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+  defp get_collection_filter_le() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_le.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+  defp get_collection_filter_eq() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_eq.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+  defp get_collection_filter_ne() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_ne.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  # Get collection of products: filter by price, name and rating
+  defp get_collection_filter_several_conditions() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products_collection_filter_several_conditions.json"),
+        headers: [],
         status_code: 200
       }}
   end

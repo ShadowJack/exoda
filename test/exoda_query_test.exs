@@ -14,15 +14,65 @@ defmodule ExodaQueryTest do
     assert %Product{id: _} = hd(entries)
   end
 
-  test "select option is restricting returned fields" do
+  test "`select` option is restricting returned fields" do
+    query = from p in Product, select: p.name
+    entries = Repo.all(query)
+    assert length(entries) > 0
+    assert Enum.all?(entries, fn name -> is_binary(name) end)
+
     query = from p in Product, select: [p.name, p.price]
     entries = Repo.all(query)
     assert length(entries) > 0
-    assert Enum.all?(entries, fn arr -> length(arr) == 2 end)
+    assert Enum.all?(entries, fn arr -> is_list(arr) && length(arr) == 2 end)
   end
 
-  @tag :skip
-  test "where option is filtering results" do
+  describe "`where` option" do
+    test "comparison operators" do
+      query = from p in Product, where: p.price > 20.0
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.price > 20.0 end)
+
+      query = from p in Product, where: p.price >= 20.9
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.price >= 20.9 end)
+      assert Enum.any?(entries, fn p -> p.price == 20.9 end)
+
+      query = from p in Product, where: p.price < 20.0
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.price < 20.0 end)
+
+      query = from p in Product, where: p.price <= 20.9
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.price <= 20.9 end)
+      assert Enum.any?(entries, fn p -> p.price == 20.9 end)
+
+      query = from p in Product, where: p.price == 2.5
+      entries = Repo.all(query)
+      assert length(entries) == 1
+      assert Enum.all?(entries, fn p -> p.price == 2.5 end)
+
+      query = from p in Product, where: p.price != 2.5
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.price != 2.5 end)
+    end
+
+    test "several conditions" do
+      query = from p in Product, where: p.price > 3.0 and p.name == "Milk"
+      query = from p in query, where: p.rating <= 4
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.price > 3.0 and p.rating < 4 end)
+    end
+
+    @tag :skip
+    test "bind valiables" do
+      
+    end
   end
 
   @tag :skip

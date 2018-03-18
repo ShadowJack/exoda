@@ -62,6 +62,7 @@ defmodule Exoda.Query do
       Opts: #{inspect(opts)}
       Query sources: #{inspect(query.sources)}
       Query select: #{inspect(query.select)}
+      Query wheres: #{inspect(query.wheres)}
       """
     )
 
@@ -78,23 +79,11 @@ defmodule Exoda.Query do
   defp build_url(:all, %Query{sources: sources} = query) do
     %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
     {source_path, _schema} = elem(sources, 0)
-    query_string = build_query_string(query)
+    query_string = Exoda.Query.Builder.build_query_string(query)
     {:ok, "#{service_url}/#{source_path}#{query_string}"}
   end
   defp build_url(_, _), do: {:error, "Not supported"}
 
-  @spec build_query_string(query) :: String.t
-  defp build_query_string(%Ecto.Query{select: %Ecto.Query.SelectExpr{expr: {:&, _, _}}}) do
-    # select full entity
-    ""
-  end
-  defp build_query_string(%Ecto.Query{select: %Ecto.Query.SelectExpr{fields: fields}}) do
-    # select only some fields
-    select = fields
-    |> Enum.map(fn {{:., _, [_, field]}, _, _} -> field end)
-    |> Enum.join(",")
-    "?$select=#{select}" 
-  end
 
   @spec build_headers(operation) :: {:ok, HTTPoison.headers} | {:error, String.t}
   defp build_headers(:all) do
