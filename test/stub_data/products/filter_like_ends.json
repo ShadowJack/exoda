@@ -1,0 +1,14 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products",
+  "value": [
+    {
+      "ID": 2,
+      "Name": "Vint soda",
+      "Description": "Americana Variety - Mix of 6 flavors",
+      "ReleaseDate": "2000-10-01T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 3,
+      "Price": 20.9
+    }
+  ]
+}

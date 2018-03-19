@@ -79,6 +79,21 @@ defmodule Exoda.Query.Builder do
   defp build_filter({op, _, [left, right]}) when op in [:and, :or] do
     "(#{build_filter(left)}) #{convert_op(op)} (#{build_filter(right)})"
   end
+  # naive like/2 function escaped % symbols are not supported
+  defp build_filter({:like, _, [expr, value]}) do
+    source = build_filter(expr)
+    trimmed_value = String.trim(value, "%")
+    cond do
+      String.starts_with?(value, "%") and String.ends_with?(value, "%") ->
+        "contains(#{source}, '#{trimmed_value}')"
+      String.starts_with?(value, "%") ->
+        "endswith(#{source}, '#{trimmed_value}')"
+      String.ends_with?(value, "%") ->
+        "startswith(#{source}, '#{trimmed_value}')"
+      :otherwise ->
+        build_filter({:==, [], [expr, value]})
+    end
+  end
   # Other binary expressoins
   defp build_filter({op, _, [left, right]}) do
     "#{build_filter(left)} #{convert_op(op)} #{build_filter(right)}"
@@ -86,6 +101,7 @@ defmodule Exoda.Query.Builder do
   # Leave raw literal value as is
   defp build_filter(string) when is_binary(string), do: "'#{string}'"
   defp build_filter(literal), do: literal
+
 
   # Convert Ecto operators and functions into OData
   @spec convert_op(atom) :: String.t

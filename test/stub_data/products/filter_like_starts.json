@@ -1,0 +1,14 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products",
+  "value": [
+    {
+      "ID": 4,
+      "Name": "Fruit Punch",
+      "Description": "Mango flavor, 8.3 Ounce Cans (Pack of 24)",
+      "ReleaseDate": "2003-01-05T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 3,
+      "Price": 22.99
+    }
+  ]
+}

@@ -18,7 +18,7 @@ defmodule Exoda.Fakes.Client do
 
   @impl true
   def get(url, _ \\ [], _ \\ []) do
-    Logger.debug("Url requested: #{url}")
+    Logger.info("Url requested: #{url}")
     cond do
       String.ends_with?(url, "select=Name") -> get_collection_select_name_response()
       String.ends_with?(url, "select=Name,Price") -> get_collection_select_name_price_response()
@@ -30,6 +30,12 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "filter=(Price%20eq%202.5)") -> get_collection_filter_eq()
       String.ends_with?(url, "filter=(Price%20ne%202.5)") -> get_collection_filter_ne()
       String.ends_with?(url, "filter=((Price%20gt%203.0)%20and%20(Name%20eq%20'Milk'))%20and%20(Rating%20le%204)") -> get_collection_filter_several_conditions()
+      String.ends_with?(url, "filter=(not%20(Name%20eq%20'Milk'))") -> get_collection_filter_not()
+      String.ends_with?(url, "filter=((DiscontinuedDate)%20eq%20null)") -> get_collection_filter_is_nil()
+      String.ends_with?(url, "filter=(endswith(Name,%20'soda'))") -> get_collection_filter_like_ends()
+      String.ends_with?(url, "filter=(startswith(Name,%20'Fruit%20'))") -> get_collection_filter_like_starts()
+      String.ends_with?(url, "filter=(contains(Name,%20'monad'))") -> get_collection_filter_like_contains()
+      String.ends_with?(url, "filter=(Name%20eq%20'Milk')") -> get_collection_filter_like_equals()
     end
   end
 
@@ -88,7 +94,7 @@ defmodule Exoda.Fakes.Client do
     {:ok, 
       %Response{
         status_code: 200,
-        body: File.read!("test/stub_data/products_collection.json"),
+        body: File.read!("test/stub_data/products/all.json"),
         headers: [
                {"Cache-Control", "no-cache"},
                {"Content-Length", "2011"},
@@ -104,7 +110,7 @@ defmodule Exoda.Fakes.Client do
   defp get_collection_select_name_response() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_select_name.json"),
+        body: File.read!("test/stub_data/products/select_name.json"),
         headers: [
           {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
           {"OData-Version", "4.0;"}
@@ -118,12 +124,8 @@ defmodule Exoda.Fakes.Client do
   defp get_collection_select_name_price_response() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_select_name_price.json"),
-        headers: [
-          {"Content-Type", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8"},
-          {"OData-Version", "4.0;"}
-        ],
-        request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products?$select=Name,Price",
+        body: File.read!("test/stub_data/products/select_name_price.json"),
+        headers: [ ],
         status_code: 200
       }}
   end
@@ -132,52 +134,117 @@ defmodule Exoda.Fakes.Client do
   defp get_collection_filter_gt() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_gt.json"),
+        body: File.read!("test/stub_data/products/filter_gt.json"),
         headers: [ ],
         status_code: 200
       }
     }
   end
+
   defp get_collection_filter_ge() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_ge.json"),
+        body: File.read!("test/stub_data/products/filter_ge.json"),
         headers: [ ],
         status_code: 200
       }
     }
   end
+
   defp get_collection_filter_lt() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_lt.json"),
+        body: File.read!("test/stub_data/products/filter_lt.json"),
         headers: [ ],
         status_code: 200
       }
     }
   end
+
   defp get_collection_filter_le() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_le.json"),
+        body: File.read!("test/stub_data/products/filter_le.json"),
         headers: [ ],
         status_code: 200
       }
     }
   end
+
   defp get_collection_filter_eq() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_eq.json"),
+        body: File.read!("test/stub_data/products/filter_eq.json"),
         headers: [ ],
         status_code: 200
       }
     }
   end
+
   defp get_collection_filter_ne() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_ne.json"),
+        body: File.read!("test/stub_data/products/filter_ne.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  defp get_collection_filter_not() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_not.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  defp get_collection_filter_is_nil() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_is_nil.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  defp get_collection_filter_like_ends() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_like_ends.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  defp get_collection_filter_like_starts() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_like_starts.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  defp get_collection_filter_like_contains() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_like_contains.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  defp get_collection_filter_like_equals() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_like_equals.json"),
         headers: [ ],
         status_code: 200
       }
@@ -188,7 +255,7 @@ defmodule Exoda.Fakes.Client do
   defp get_collection_filter_several_conditions() do
     {:ok,
       %HTTPoison.Response{
-        body: File.read!("test/stub_data/products_collection_filter_several_conditions.json"),
+        body: File.read!("test/stub_data/products/filter_several_conditions.json"),
         headers: [],
         status_code: 200
       }}

@@ -69,6 +69,48 @@ defmodule ExodaQueryTest do
       assert Enum.all?(entries, fn p -> p.price > 3.0 and p.rating < 4 end)
     end
 
+    test "`not` option negates expression" do
+      query = from p in Product, where: not(p.name == "Milk")
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.name != "Milk" end)
+    end
+
+    test "`is_nil` function" do
+      query = from p in Product, where: is_nil(p.discontinued_date)
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.discontinued_date == nil end)
+    end
+
+    test "ends with" do
+      query = from p in Product, where: like(p.name, "%soda")
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> String.ends_with?(p.name, "soda") end)
+    end
+
+    test "starts with" do
+      query = from p in Product, where: like(p.name, "Fruit %")
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> String.starts_with?(p.name, "Fruit ") end)
+    end
+
+    test "contains" do
+      query = from p in Product, where: like(p.name, "%monad%")
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> String.contains?(p.name, "monad") end)
+    end
+
+    test "equals" do
+      query = from p in Product, where: like(p.name, "Milk")
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.name == "Milk" end)
+    end
+
     @tag :skip
     test "bind valiables" do
       
