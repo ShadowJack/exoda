@@ -15,6 +15,7 @@ defmodule Exoda.Query do
   @typep process :: Ecto.Adapter.process()
   @typep cached :: Ecto.Adapter.cached()
   @typep operation :: :all | :update_all | :delete_all
+  @typep params :: []
 
   @client Application.get_env(:exoda, :client)
 
@@ -44,7 +45,7 @@ defmodule Exoda.Query do
   expected Ecto type. The `process` function will be nil if no
   result set is expected from the query.
   """
-  @spec execute(repo, query_meta, query, params :: list(), process | nil, options) :: result
+  @spec execute(repo, query_meta, query, params, process | nil, options) :: result
             when result: {integer, [[term]] | nil} | no_return,
                  query:
                    {:nocache, prepared}
@@ -66,7 +67,7 @@ defmodule Exoda.Query do
       """
     )
 
-    with {:ok, url} <- build_url(operation, query),
+    with {:ok, url} <- build_url(operation, query, params),
          {:ok, headers} <- build_headers(operation),
          {:ok, response} <- @client.get(url, headers) do
       parse_response(response, process, query)
@@ -75,14 +76,14 @@ defmodule Exoda.Query do
     end
   end
 
-  @spec build_url(operation, query) :: {:ok, String.t} | {:error, String.t}
-  defp build_url(:all, %Query{sources: sources} = query) do
+  @spec build_url(operation, query, params) :: {:ok, String.t} | {:error, String.t}
+  defp build_url(:all, %Query{sources: sources} = query, params) do
     %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
     {source_path, _schema} = elem(sources, 0)
-    query_string = Exoda.Query.Builder.build_query_string(query)
+    query_string = Exoda.Query.Builder.build_query_string(query, params)
     {:ok, "#{service_url}/#{source_path}#{query_string}"}
   end
-  defp build_url(_, _), do: {:error, "Not supported"}
+  defp build_url(_, _, _), do: {:error, "Not supported"}
 
 
   @spec build_headers(operation) :: {:ok, HTTPoison.headers} | {:error, String.t}

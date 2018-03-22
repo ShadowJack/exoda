@@ -1,0 +1,14 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products",
+  "value": [
+    {
+      "ID": 1,
+      "Name": "Milk",
+      "Description": "Low fat milk",
+      "ReleaseDate": "1995-10-01T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 3,
+      "Price": 3.5
+    }
+  ]
+}

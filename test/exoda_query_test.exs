@@ -111,9 +111,13 @@ defmodule ExodaQueryTest do
       assert Enum.all?(entries, fn p -> p.name == "Milk" end)
     end
 
-    @tag :skip
-    test "bind valiables" do
-      
+    test "bind parameters" do
+      name = "Milk"
+      min_price = 1
+      query = from p in Product, where: p.name == ^name and p.price >= ^min_price
+      product = Repo.one(query)
+      assert product.name == name
+      assert product.price >= min_price
     end
   end
 

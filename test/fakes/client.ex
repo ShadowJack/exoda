@@ -36,6 +36,7 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "filter=(startswith(Name,%20'Fruit%20'))") -> get_collection_filter_like_starts()
       String.ends_with?(url, "filter=(contains(Name,%20'monad'))") -> get_collection_filter_like_contains()
       String.ends_with?(url, "filter=(Name%20eq%20'Milk')") -> get_collection_filter_like_equals()
+      String.ends_with?(url, "filter=((Name%20eq%20Milk)%20and%20(Price%20ge%201.0))") -> get_collection_filter_params()
     end
   end
 
@@ -245,6 +246,17 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/filter_like_equals.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+  J
+
+  defp get_collection_filter_params() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_params.json"),
         headers: [ ],
         status_code: 200
       }
