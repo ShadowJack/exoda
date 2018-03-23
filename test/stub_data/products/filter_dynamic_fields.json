@@ -1,0 +1,33 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products",
+  "value": [
+    {
+      "ID": 0,
+      "Name": "Bread",
+      "Description": "Whole grain bread",
+      "ReleaseDate": "1992-01-01T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 4,
+      "Price": 2.5
+    },
+    {
+      "ID": 7,
+      "Name": "DVD Player",
+      "Description": "1080P Upconversion DVD Player",
+      "ReleaseDate": "2006-11-15T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 5,
+      "Price": 35.88
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 9,
+      "Name": "Lemonade",
+      "Description": "Classic, refreshing lemonade (Single bottle)",
+      "ReleaseDate": "1970-01-01T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 7,
+      "Price": 1.01
+    }
+  ]
+}

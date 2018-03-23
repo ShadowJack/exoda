@@ -119,6 +119,14 @@ defmodule ExodaQueryTest do
       assert product.name == name
       assert product.price >= min_price
     end
+
+    test "dynamic fields" do
+      price_or_rating = :rating
+      query = from p in Product, where: field(p, ^price_or_rating) >= 4
+      entries = Repo.all(query)
+      assert length(entries) > 0
+      assert Enum.all?(entries, fn p -> p.rating >= 4 end)
+    end
   end
 
   @tag :skip
