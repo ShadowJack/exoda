@@ -127,6 +127,11 @@ defmodule ExodaQueryTest do
       assert length(entries) > 0
       assert Enum.all?(entries, fn p -> p.rating >= 4 end)
     end
+
+    test "fragments" do
+      query = from p in Product, where: fragment("tolower(?)", p.name) == "milk"
+      assert %Product{name: "Milk"} = Repo.one(query)
+    end
   end
 
   @tag :skip

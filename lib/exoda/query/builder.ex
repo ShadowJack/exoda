@@ -74,9 +74,9 @@ defmodule Exoda.Query.Builder do
   end
   # Get value from params
   defp build_filter({:^, _, [index]}, params), do: Enum.at(params, index)
-  # Get source field
+  # Get source field name
   defp build_filter({{:., [], [{:&, [], [0]}, field]}, _, []}, _), do: field
-  # in/2 operator
+  # in/2 operator is not supported
   defp build_filter({:in, _, _}, _) do
     throw "Inclusion operator in/2 is not supported by Exoda adapter"
   end
@@ -84,7 +84,7 @@ defmodule Exoda.Query.Builder do
   defp build_filter({op, _, [left, right]}, params) when op in [:and, :or] do
     "(#{build_filter(left, params)}) #{convert_op(op)} (#{build_filter(right, params)})"
   end
-  # naive like/2 function: escaped % symbols are not supported
+  # Naive like/2 function: escaped % symbols are not supported
   defp build_filter({:like, _, [expr, value]}, params) do
     source = build_filter(expr, params)
     trimmed_value = String.trim(value, "%")
@@ -99,6 +99,8 @@ defmodule Exoda.Query.Builder do
         build_filter({:==, [], [expr, value]}, params)
     end
   end
+  # Build fragment expression
+  defp build_filter({:fragment, _, parts}, params), do: build_fragment(parts, params)
   # Other binary expressoins
   defp build_filter({op, _, [left, right]}, params) do
     "#{build_filter(left, params)} #{convert_op(op)} #{build_filter(right, params)}"
@@ -107,6 +109,13 @@ defmodule Exoda.Query.Builder do
   defp build_filter(string, _) when is_binary(string), do: "'#{string}'"
   defp build_filter(literal, _), do: literal
 
+  @spec build_fragment(Keyword.t, params) :: String.t
+  defp build_fragment(parts, params) do
+    Enum.reduce(parts, "", fn 
+      {:raw, str}, acc -> "#{acc}#{str}"
+      {:expr, expr}, acc -> "#{acc}#{build_filter(expr, params)}"
+    end)
+  end
 
   # Convert Ecto operators and functions into OData
   @spec convert_op(atom) :: String.t
