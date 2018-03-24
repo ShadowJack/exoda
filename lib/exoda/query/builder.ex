@@ -72,10 +72,17 @@ defmodule Exoda.Query.Builder do
   defp build_filter({op, [], _}, _) when op in [:min, :max, :sum, :avg] do
     throw "min/1, max/1, sum/1 and avg/1 functions are not supported by Exoda adapter"
   end
+  defp build_filter({op, [], _}, _) when op in [:datetime_add, :date_add, :from_now, :ago] do
+    throw "Date/time functions: datetime_add/3, date_add/3, from_now/2 and ago/2 are not supported by Exoda adapter"
+  end
   # Get value from params
   defp build_filter({:^, _, [index]}, params), do: Enum.at(params, index)
   # Get source field name
   defp build_filter({{:., [], [{:&, [], [0]}, field]}, _, []}, _), do: field
+  # Type casting is not supported
+  defp build_filter(%Ecto.Query.Tagged{type: _}, _) do
+    throw "Type casting is not supported for values. OData server can cast types only for expressions."
+  end
   # in/2 operator is not supported
   defp build_filter({:in, _, _}, _) do
     throw "Inclusion operator in/2 is not supported by Exoda adapter"
@@ -117,13 +124,31 @@ defmodule Exoda.Query.Builder do
     end)
   end
 
-  # Convert Ecto operators and functions into OData
+  @doc """
+  Convert Ecto operators and functions into OData
+  """
   @spec convert_op(atom) :: String.t
-  defp convert_op(:==), do: "eq"
-  defp convert_op(:!=), do: "ne"
-  defp convert_op(:>), do: "gt"
-  defp convert_op(:>=), do: "ge"
-  defp convert_op(:<), do: "lt"
-  defp convert_op(:<=), do: "le"
-  defp convert_op(op), do: to_string(op)
+  def convert_op(:==), do: "eq"
+  def convert_op(:!=), do: "ne"
+  def convert_op(:>), do: "gt"
+  def convert_op(:>=), do: "ge"
+  def convert_op(:<), do: "lt"
+  def convert_op(:<=), do: "le"
+  def convert_op(op), do: to_string(op)
+
+  @doc """
+  Convert Ecto type to Edm type
+  """
+  @spec convert_type(atom) :: String.t
+  def convert_type(:id), do: "Edm.Int64"
+  def convert_type(:binary_id), do: "Edm.String"
+  def convert_type(:integer), do: "Edm.Int32"
+  def convert_type(:float), do: "Edm.Double"
+  def convert_type(:boolean), do: "Edm.Boolean"
+  def convert_type(:string), do: "Edm.String"
+  def convert_type(:binary), do: "Edm.Binary"
+  def convert_type(:time), do: "Edm.Time"
+  def convert_type(:naive_datetime), do: "Edm.DateTime"
+  def convert_type(:utc_datetime), do: "Edm.DateTime"
+  def convert_type(other_type), do: throw "Type `#{other_type}` is not supported by Exoda adapter"
 end

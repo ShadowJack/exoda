@@ -8,107 +8,107 @@ defmodule ExodaQueryTest do
     :ok
   end
   
-  test "all entries are successfully fetched" do
-    entries = Repo.all(Product)
-    assert length(entries) > 0
-    assert %Product{id: _} = hd(entries)
+  test "all products are successfully fetched" do
+    products = Repo.all(Product)
+    assert length(products) > 0
+    assert %Product{id: _} = hd(products)
   end
 
   test "`select` option is restricting returned fields" do
     query = from p in Product, select: p.name
-    entries = Repo.all(query)
-    assert length(entries) > 0
-    assert Enum.all?(entries, fn name -> is_binary(name) end)
+    products = Repo.all(query)
+    assert length(products) > 0
+    assert Enum.all?(products, fn name -> is_binary(name) end)
 
     query = from p in Product, select: [p.name, p.price]
-    entries = Repo.all(query)
-    assert length(entries) > 0
-    assert Enum.all?(entries, fn arr -> is_list(arr) && length(arr) == 2 end)
+    products = Repo.all(query)
+    assert length(products) > 0
+    assert Enum.all?(products, fn arr -> is_list(arr) && length(arr) == 2 end)
   end
 
   describe "`where` option" do
     test "comparison operators" do
       query = from p in Product, where: p.price > 20.0
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.price > 20.0 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.price > 20.0 end)
 
       query = from p in Product, where: p.price >= 20.9
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.price >= 20.9 end)
-      assert Enum.any?(entries, fn p -> p.price == 20.9 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.price >= 20.9 end)
+      assert Enum.any?(products, fn p -> p.price == 20.9 end)
 
       query = from p in Product, where: p.price < 20.0
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.price < 20.0 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.price < 20.0 end)
 
       query = from p in Product, where: p.price <= 20.9
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.price <= 20.9 end)
-      assert Enum.any?(entries, fn p -> p.price == 20.9 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.price <= 20.9 end)
+      assert Enum.any?(products, fn p -> p.price == 20.9 end)
 
       query = from p in Product, where: p.price == 2.5
-      entries = Repo.all(query)
-      assert length(entries) == 1
-      assert Enum.all?(entries, fn p -> p.price == 2.5 end)
+      products = Repo.all(query)
+      assert length(products) == 1
+      assert Enum.all?(products, fn p -> p.price == 2.5 end)
 
       query = from p in Product, where: p.price != 2.5
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.price != 2.5 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.price != 2.5 end)
     end
 
     test "several conditions" do
       query = from p in Product, where: p.price > 3.0 and p.name == "Milk"
       query = from p in query, where: p.rating <= 4
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.price > 3.0 and p.rating < 4 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.price > 3.0 and p.rating < 4 end)
     end
 
     test "`not` option negates expression" do
       query = from p in Product, where: not(p.name == "Milk")
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.name != "Milk" end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.name != "Milk" end)
     end
 
     test "`is_nil` function" do
       query = from p in Product, where: is_nil(p.discontinued_date)
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.discontinued_date == nil end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.discontinued_date == nil end)
     end
 
     test "ends with" do
       query = from p in Product, where: like(p.name, "%soda")
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> String.ends_with?(p.name, "soda") end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> String.ends_with?(p.name, "soda") end)
     end
 
     test "starts with" do
       query = from p in Product, where: like(p.name, "Fruit %")
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> String.starts_with?(p.name, "Fruit ") end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> String.starts_with?(p.name, "Fruit ") end)
     end
 
     test "contains" do
       query = from p in Product, where: like(p.name, "%monad%")
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> String.contains?(p.name, "monad") end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> String.contains?(p.name, "monad") end)
     end
 
     test "equals" do
       query = from p in Product, where: like(p.name, "Milk")
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.name == "Milk" end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.name == "Milk" end)
     end
 
     test "bind parameters" do
@@ -123,13 +123,19 @@ defmodule ExodaQueryTest do
     test "dynamic fields" do
       price_or_rating = :rating
       query = from p in Product, where: field(p, ^price_or_rating) >= 4
-      entries = Repo.all(query)
-      assert length(entries) > 0
-      assert Enum.all?(entries, fn p -> p.rating >= 4 end)
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn p -> p.rating >= 4 end)
     end
 
     test "fragments" do
       query = from p in Product, where: fragment("tolower(?)", p.name) == "milk"
+      assert %Product{name: "Milk"} = Repo.one(query)
+    end
+
+    test "type casting" do
+      rating = 4
+      query = from p in Product, where: fragment("?", p.rating) >= type(p.price, :integer)
       assert %Product{name: "Milk"} = Repo.one(query)
     end
   end
@@ -159,7 +165,7 @@ defmodule ExodaQueryTest do
   end
 
   @tag :skip
-  test "limit option limits number of entries returned from the query" do
+  test "limit option limits number of products returned from the query" do
   end
 
   @tag :skip
