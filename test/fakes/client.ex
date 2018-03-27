@@ -39,6 +39,8 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "filter=((Name%20eq%20Milk)%20and%20(Price%20ge%201.0))") -> get_collection_filter_params()
       String.ends_with?(url, "filter=(Rating%20ge%204)") -> get_collection_filter_dynamic_fields()
       String.ends_with?(url, "filter=(tolower(Name)%20eq%20'milk')") -> get_collection_filter_fragment()
+      String.ends_with?(url, "filter=(contains(ProductDetail/Details,%20'product'))") -> get_collection_filter_join()
+
     end
   end
 
@@ -290,6 +292,16 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/filter_several_conditions.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+
+  # Get collection of products: filter by associated ProductDetail
+  defp get_collection_filter_join() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/filter_join.json"),
         headers: [],
         status_code: 200
       }}

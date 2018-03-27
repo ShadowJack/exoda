@@ -52,7 +52,7 @@ defmodule Exoda.Query do
                    | {:cached, (prepared -> :ok), cached}
                    | {:cache, (cached -> :ok), prepared}
   def execute(_repo, query_meta, {:nocache, {operation, query}}, params, process, opts) do
-    Logger.debug(
+    Logger.info(
       """
       Execute query.
       Query type: #{inspect(operation)}
@@ -62,6 +62,7 @@ defmodule Exoda.Query do
       Process: #{inspect(process)}
       Opts: #{inspect(opts)}
       Query sources: #{inspect(query.sources)}
+      Query joins: #{inspect(query.joins)}
       Query select: #{inspect(query.select)}
       Query wheres: #{inspect(query.wheres)}
       """

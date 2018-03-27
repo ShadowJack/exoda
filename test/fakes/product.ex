@@ -14,6 +14,8 @@ defmodule Exoda.Fakes.Product do
     field :price, :float, source: "Price"
     field :rating, :integer, source: "Rating"
     field :release_date, :utc_datetime, source: "ReleaseDate", read_after_writes: true
+    many_to_many :categories, {"Categories", Exoda.Fakes.Category}, join_through: "Categories"
+    has_one :product_detail, {"ProductDetail", Exoda.Fakes.ProductDetail}
   end
 
   @doc false
