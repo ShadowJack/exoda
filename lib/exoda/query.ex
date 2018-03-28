@@ -81,10 +81,28 @@ defmodule Exoda.Query do
   defp build_url(:all, %Query{sources: sources} = query, params) do
     %{service_url: service_url} = Exoda.ServiceDescription.get_settings()
     {source_path, _schema} = elem(sources, 0)
-    query_string = Exoda.Query.Builder.build_query_string(query, params)
+    query_string = build_query_string(query, params)
     {:ok, "#{service_url}/#{source_path}#{query_string}"}
   end
   defp build_url(_, _, _), do: {:error, "Not supported"}
+
+  # Builds a valid OData query string from Ecto query
+  @spec build_query_string(query, params) :: String.t
+  def build_query_string(query, params) do
+    query_string = 
+      Map.new()
+      |> Exoda.Query.Select.add_select(query)
+      |> Exoda.Query.Filter.add_filter(query, params)
+      |> Enum.map(fn {name, value} -> "#{name}=#{value}" end)
+      |> Enum.join("&")
+      |> URI.encode()
+
+    case query_string do
+      "" -> ""
+      q -> "?#{q}"
+    end
+  end
+
 
 
   @spec build_headers(operation) :: {:ok, HTTPoison.headers} | {:error, String.t}
