@@ -1,0 +1,109 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(ID,Name,Categories,Categories(Name))",
+  "value": [
+    {
+      "ID": 0,
+      "Name": "Bread",
+      "Categories": [
+        {
+          "Name": "Food"
+        }
+      ]
+    },
+    {
+      "ID": 1,
+      "Name": "Milk",
+      "Categories": [
+        {
+          "Name": "Food"
+        },
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "ID": 2,
+      "Name": "Vint soda",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "ID": 3,
+      "Name": "Havina Cola",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "ID": 4,
+      "Name": "Fruit Punch",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "ID": 5,
+      "Name": "Cranberry Juice",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "ID": 6,
+      "Name": "Pink Lemonade",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "ID": 7,
+      "Name": "DVD Player",
+      "Categories": [
+        {
+          "Name": "Electronics"
+        }
+      ]
+    },
+    {
+      "ID": 8,
+      "Name": "LCD HDTV",
+      "Categories": [
+        {
+          "Name": "Electronics"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 9,
+      "Name": "Lemonade",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 10,
+      "Name": "Coffee",
+      "Categories": [
+        {
+          "Name": "Beverages"
+        }
+      ]
+    }
+  ]
+}

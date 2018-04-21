@@ -1,7 +1,8 @@
 defmodule ExodaQueryTest do
   use ExUnit.Case, async: false
   import Ecto.Query
-  alias Exoda.{Query, Fakes.Repo, Fakes.Product}
+  alias Exoda.Query
+  alias Exoda.Fakes.{Repo, Product, ProductDetail, ProductDetailUnassociated, Category}
 
   setup do
     {:ok, _} = start_supervised({Exoda.Fakes.Repo, []})
@@ -14,19 +15,60 @@ defmodule ExodaQueryTest do
     assert %Product{id: _} = hd(products)
   end
 
-  test "`select` option is restricting returned fields" do
-    query = from p in Product, select: p.name
-    products = Repo.all(query)
-    assert length(products) > 0
-    assert Enum.all?(products, fn name -> is_binary(name) end)
+  describe "$select option" do
+    test "can return only one field" do
+      query = from p in Product, select: p.name
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn name -> is_binary(name) end)
+    end
 
-    query = from p in Product, select: [p.name, p.price]
-    products = Repo.all(query)
-    assert length(products) > 0
-    assert Enum.all?(products, fn arr -> is_list(arr) && length(arr) == 2 end)
+    test "can return array" do
+      query = from p in Product, select: [p.name, p.price]
+      products = Repo.all(query)
+      assert length(products) > 0
+      assert Enum.all?(products, fn arr -> is_list(arr) && length(arr) == 2 end)
+    end
+
+    test "can return tuple" do
+      query = from p in Product, 
+        select: {p.name, p.rating}
+      results = Repo.all(query)
+      assert length(results) > 0
+      assert {_, _} = hd(results)
+    end
+
+    test "can return tuple with association" do
+      query = from p in Product, 
+        join: c in assoc(p, :categories), 
+        select: {p.id, p.name, c.name}
+      results = Repo.all(query)
+      assert length(results) > 0
+      assert {_id, _name, _cat_name} = List.first(results)
+    end
+
+    test "can return only full association" do
+      query = from p in Product, 
+        join: pd in assoc(p, :product_detail), 
+        select: pd 
+      results = Repo.all(query)
+      assert length(results) > 0
+      #TODO: fix this test
+      assert %ProductDetail{product_id: _} = hd(results)
+    end
+
+    @tag :skip
+    test "associations without selects are not expanded" do
+      query = from p in Product, 
+        join: pd in assoc(p, :product_detail), 
+        select: p 
+      results = Repo.all(query)
+      assert length(results) > 0
+      #TODO: check that product_detail is not in expands of the request
+    end
   end
 
-  describe "`where` option" do
+  describe "$where option" do
     test "supports comparison operators" do
       query = from p in Product, where: p.price > 20.0
       products = Repo.all(query)
@@ -134,19 +176,14 @@ defmodule ExodaQueryTest do
     end
   end
 
-  @tag :skip
-  test "join without associatoin" do
-    
-  end
-
-  @tag :skip
-  test "join with another query" do
-    
-  end
-
-  @tag :skip
-  test "join with has_many association" do
-    
+  test "join without associatoin is not supported" do
+    assert_raise(RuntimeError, "Association path from #{Product} to #{ProductDetailUnassociated} is not found", fn -> 
+      query = from p in Product, 
+        join: pd in ProductDetailUnassociated, 
+        on: p.id == pd.product_id,
+        where: like(pd.details, "%milk%")
+      Repo.all(query)
+    end)
   end
 
   @tag :skip

@@ -166,16 +166,17 @@ defmodule Exoda.Query.Filter do
   # ```
   @spec get_assoc_field(sources, integer, String.t) :: String.t | none
   defp get_assoc_field(sources, idx, field) do
+    #TODO: validate that join is made through fields that are in assoc
     {_, source_schema} = elem(sources, 0)
     {_, target_schema} = elem(sources, idx)
     case find_associations_path(source_schema, target_schema, [], []) do
-      "" -> raise "Association path from #{source_schema} to #{target_schema} is not found"
+      [] -> raise "Association path from #{source_schema} to #{target_schema} is not found"
       path -> "#{path}/#{field}"
     end
   end
 
   # DFS of full path from `source` schema to `target` schema
-  @spec find_associations_path(module, module, [module], [String.t]) :: String.t
+  @spec find_associations_path(module, module, [module], [String.t]) :: String.t | []
   defp find_associations_path(source, target, _, path) when source == target do
     Enum.reverse(path) |> Enum.join("/")
   end

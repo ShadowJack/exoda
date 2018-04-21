@@ -20,8 +20,10 @@ defmodule Exoda.Fakes.Client do
   def get(url, _ \\ [], _ \\ []) do
     Logger.info("Url requested: #{url}")
     cond do
-      String.ends_with?(url, "select=Name") -> get_collection_select_name_response()
-      String.ends_with?(url, "select=Name,Price") -> get_collection_select_name_price_response()
+      String.ends_with?(url, "select=Name") -> get_collection_select_name()
+      String.ends_with?(url, "select=Name,Price") -> get_collection_select_name_price()
+      String.ends_with?(url, "select=Name,Rating") -> get_collection_select_name_rating()
+      String.contains?(url, "select=ID,Name&$expand=Categories($select=Name)") -> get_collection_select_expand_categories()
       String.ends_with?(url, "Products") -> get_collection_response()
       String.ends_with?(url, "filter=(Price%20gt%2020.0)") -> get_collection_filter_gt()
       String.ends_with?(url, "filter=(Price%20ge%2020.9)") -> get_collection_filter_ge()
@@ -112,7 +114,7 @@ defmodule Exoda.Fakes.Client do
   end
 
   # Get collection of products, select only one field
-  defp get_collection_select_name_response() do
+  defp get_collection_select_name() do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/select_name.json"),
@@ -122,17 +124,41 @@ defmodule Exoda.Fakes.Client do
         ],
         request_url: "http://services.odata.org/V4/(S(1ldwlff3vlwnnll4udpfi4uj))/OData/OData.svc/Products?$select=Name",
         status_code: 200
-      }}
+      }
+    }
   end
 
   # Get collection of products, select only two fields
-  defp get_collection_select_name_price_response() do
+  defp get_collection_select_name_price() do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/select_name_price.json"),
         headers: [ ],
         status_code: 200
-      }}
+      }
+    }
+  end
+
+  # Get collection of products, select only name and rating tuple
+  defp get_collection_select_name_rating() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/select_name_rating.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  # Get collection of product names with expanded categories
+  defp get_collection_select_expand_categories() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/select_expand_categories.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
   end
 
   # Get collection of products: filter by price

@@ -1,0 +1,51 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(Name,Rating)",
+  "value": [
+    {
+      "Name": "Bread",
+      "Rating": 4
+    },
+    {
+      "Name": "Milk",
+      "Rating": 3
+    },
+    {
+      "Name": "Vint soda",
+      "Rating": 3
+    },
+    {
+      "Name": "Havina Cola",
+      "Rating": 3
+    },
+    {
+      "Name": "Fruit Punch",
+      "Rating": 3
+    },
+    {
+      "Name": "Cranberry Juice",
+      "Rating": 3
+    },
+    {
+      "Name": "Pink Lemonade",
+      "Rating": 3
+    },
+    {
+      "Name": "DVD Player",
+      "Rating": 5
+    },
+    {
+      "Name": "LCD HDTV",
+      "Rating": 3
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "Name": "Lemonade",
+      "Rating": 7
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "Name": "Coffee",
+      "Rating": 1
+    }
+  ]
+}
