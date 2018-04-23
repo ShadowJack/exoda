@@ -16,16 +16,25 @@ defmodule Exoda.Query.Select do
   Update `query_string_params` collection with $select and $expand parameters
   """
   @spec add_select(Map.t, Query.t) :: Map.t
-  def add_select(query_string_params, %Query{select: %SelectExpr{expr: {:&, _, _}}}) do
-    # select full entity - don't have to add $select
-    # TODO: can potentially select from association but not from the main schema
+  def add_select(query_string_params, %Query{select: %SelectExpr{expr: {:&, _, [0]}}}) do
+    # select full entity - don't have to add $select or $expand query params
     query_string_params
+  end
+  def add_select(query_string_params, %Query{select: %SelectExpr{expr: {:&, _, [idx]}}, sources: sources}) do
+    {main_source, _} = elem(sources, 0)
+    {assoc_source, _} = elem(sources, idx)
+    raise """
+    Can't select '#{assoc_source}' association from '#{main_source}'.
+    Fields to be selected should be explicitely specified.
+    Also at least one field from the '#{main_source}' should be selected.
+    """
   end
   def add_select(query_string_params, %Query{select: %SelectExpr{fields: fields}, sources: sources}) do
     sel =
       sources
       |> build_relations_tree(fields)
       |> convert_relations_tree_to_querystring()
+      |> IO.inspect(label: "Relations tree")
     case sel do
       "$select=" <> rest -> 
         Map.put(query_string_params, "$select", rest)
@@ -70,6 +79,27 @@ defmodule Exoda.Query.Select do
           result
         end
     end
+  end
+
+  @doc """
+  DFS of full path from `source` schema to `target` schema
+  """
+  #TODO: extract into a separate module
+  @spec find_associations_path(module, module) :: []
+  def find_associations_path(source, target) do
+    do_find_associations_path(source, target, [], [])
+  end
+  defp do_find_associations_path(source, target, _, path) when source == target do
+    Enum.reverse(path)
+  end
+  defp do_find_associations_path(source, target, visited, path) do
+   source.__schema__(:associations) 
+   |> Enum.map(fn assoc_name -> source.__schema__(:association, assoc_name) end)
+   |> Enum.filter(fn assoc -> is_tuple(assoc.queryable) end)
+   |> Enum.reject(fn %{queryable: {_, schema}} -> Enum.any?(visited, &(&1 == schema)) end)
+   |> Stream.map(fn %{queryable: {field, schema}} -> do_find_associations_path(schema, target, [source | visited], [field | path]) end)
+   |> Stream.drop_while(fn result -> result == [] end)
+   |> Enum.take(1)
   end
 
   # Build a tree traversing associations in BFS order

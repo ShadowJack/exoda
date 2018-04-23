@@ -47,14 +47,23 @@ defmodule ExodaQueryTest do
       assert {_id, _name, _cat_name} = List.first(results)
     end
 
-    test "can return only full association" do
-      query = from p in Product, 
-        join: pd in assoc(p, :product_detail), 
-        select: pd 
-      results = Repo.all(query)
-      assert length(results) > 0
-      #TODO: fix this test
-      assert %ProductDetail{product_id: _} = hd(results)
+    test "can't return only full association" do
+      assert_raise(RuntimeError, fn -> 
+        query = from p in Product, 
+          join: pd in assoc(p, :product_detail), 
+          select: pd 
+        results = Repo.all(query)
+      end)
+    end
+
+    #TODO: fix
+    test "at least one field from the main source should be specified" do
+      assert_raise(RuntimeError, fn -> 
+        query = from p in Product, 
+          join: pd in assoc(p, :product_detail), 
+          select: pd.details 
+        results = Repo.all(query)
+      end)
     end
 
     @tag :skip

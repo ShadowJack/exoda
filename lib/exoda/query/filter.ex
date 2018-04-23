@@ -169,25 +169,12 @@ defmodule Exoda.Query.Filter do
     #TODO: validate that join is made through fields that are in assoc
     {_, source_schema} = elem(sources, 0)
     {_, target_schema} = elem(sources, idx)
-    case find_associations_path(source_schema, target_schema, [], []) do
-      [] -> raise "Association path from #{source_schema} to #{target_schema} is not found"
-      path -> "#{path}/#{field}"
+    case Exoda.Query.Select.find_associations_path(source_schema, target_schema) do
+      [] -> 
+        raise "Association path from #{source_schema} to #{target_schema} is not found"
+      path ->  
+        "#{Enum.join(path, "/")}/#{field}"
     end
-  end
-
-  # DFS of full path from `source` schema to `target` schema
-  @spec find_associations_path(module, module, [module], [String.t]) :: String.t | []
-  defp find_associations_path(source, target, _, path) when source == target do
-    Enum.reverse(path) |> Enum.join("/")
-  end
-  defp find_associations_path(source, target, visited, path) do
-   source.__schema__(:associations) 
-   |> Enum.map(fn assoc_name -> source.__schema__(:association, assoc_name) end)
-   |> Enum.filter(fn assoc -> is_tuple(assoc.queryable) end)
-   |> Enum.reject(fn %{queryable: {_, schema}} -> Enum.any?(visited, &(&1 == schema)) end)
-   |> Stream.map(fn %{queryable: {field, schema}} -> find_associations_path(schema, target, [source | visited], [field | path]) end)
-   |> Stream.drop_while(fn result -> result == [] end)
-   |> Enum.take(1)
   end
 
   # Helper to build fragment expression
