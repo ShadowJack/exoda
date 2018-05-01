@@ -56,7 +56,6 @@ defmodule ExodaQueryTest do
       end)
     end
 
-    #TODO: fix
     test "at least one field from the main source should be specified" do
       assert_raise(RuntimeError, fn -> 
         query = from p in Product, 
@@ -66,14 +65,14 @@ defmodule ExodaQueryTest do
       end)
     end
 
-    @tag :skip
     test "associations without selects are not expanded" do
       query = from p in Product, 
         join: pd in assoc(p, :product_detail), 
-        select: p 
+        select: p.id
       results = Repo.all(query)
+      # it's checked that product_detail is not in expands of the request 
+      # inside the fake http client
       assert length(results) > 0
-      #TODO: check that product_detail is not in expands of the request
     end
   end
 

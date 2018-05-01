@@ -32,6 +32,7 @@ defmodule Exoda.Query.Select do
   end
   def add_select(query_string_params, %Query{select: %SelectExpr{fields: fields}, sources: sources}) do
     ensure_at_least_one_main_field_selected!(fields, sources)
+
     sel =
       sources
       |> build_relations_tree(fields)
@@ -42,7 +43,7 @@ defmodule Exoda.Query.Select do
       "$select=" <> rest -> 
         Map.put(query_string_params, "$select", rest)
       "" ->
-        Map.put(query_string_params, "$select", "")
+        query_string_params
     end
   end
 
@@ -73,11 +74,17 @@ defmodule Exoda.Query.Select do
           expands_queries = 
             relations.expands
             |> Enum.map(fn exp ->
-              selects = convert_relations_tree_to_querystring(exp)
-              "#{exp.expand_name}(#{selects})"
+              case convert_relations_tree_to_querystring(exp) do
+                "" -> ""
+                selects -> "#{exp.expand_name}(#{selects})"
+              end
             end)
             |> Enum.join(",")
-          result <> "&$expand=#{expands_queries}"
+
+          case expands_queries do
+            "" -> result
+            exs -> result <> "&$expand=#{exs}"
+          end
         else
           result
         end

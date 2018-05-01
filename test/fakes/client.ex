@@ -24,6 +24,7 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "select=Name,Price") -> get_collection_select_name_price()
       String.ends_with?(url, "select=Name,Rating") -> get_collection_select_name_rating()
       String.contains?(url, "select=ID,Name&$expand=Categories($select=Name)") -> get_collection_select_expand_categories()
+      String.ends_with?(url, "select=ID") -> get_collection_select_doesnt_expand_unnecessary_assoc()
       String.ends_with?(url, "Products") -> get_collection_response()
       String.ends_with?(url, "filter=(Price%20gt%2020.0)") -> get_collection_filter_gt()
       String.ends_with?(url, "filter=(Price%20ge%2020.9)") -> get_collection_filter_ge()
@@ -154,6 +155,18 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/select_expand_categories.json"),
+        headers: [ ],
+        status_code: 200
+      }
+    }
+  end
+
+  # Get collection of product IDs, 
+  # ensure that there are no expands in the query
+  defp get_collection_select_doesnt_expand_unnecessary_assoc() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/select_doesnt_expand.json"),
         headers: [ ],
         status_code: 200
       }
