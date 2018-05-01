@@ -1,6 +1,7 @@
 defmodule Exoda.Query.Select do
   alias Ecto.Query
   alias Ecto.Query.SelectExpr
+  require Logger
 
   @moduledoc """
   Helpers to build $select and $expand parameters for OData query expression
@@ -15,26 +16,28 @@ defmodule Exoda.Query.Select do
   @doc """
   Update `query_string_params` collection with $select and $expand parameters
   """
-  @spec add_select(Map.t, Query.t) :: Map.t
+  @spec add_select(Map.t, Query.t) :: Map.t | none
   def add_select(query_string_params, %Query{select: %SelectExpr{expr: {:&, _, [0]}}}) do
     # select full entity - don't have to add $select or $expand query params
     query_string_params
   end
-  def add_select(query_string_params, %Query{select: %SelectExpr{expr: {:&, _, [idx]}}, sources: sources}) do
+  def add_select(_, %Query{select: %SelectExpr{expr: {:&, _, [idx]}}, sources: sources}) do
+    Logger.info("Select not the main source, idx: #{idx}, sources: #{inspect(sources)}")
     {main_source, _} = elem(sources, 0)
     {assoc_source, _} = elem(sources, idx)
     raise """
     Can't select '#{assoc_source}' association from '#{main_source}'.
     Fields to be selected should be explicitely specified.
-    Also at least one field from the '#{main_source}' should be selected.
     """
   end
   def add_select(query_string_params, %Query{select: %SelectExpr{fields: fields}, sources: sources}) do
+    ensure_at_least_one_main_field_selected!(fields, sources)
     sel =
       sources
       |> build_relations_tree(fields)
       |> convert_relations_tree_to_querystring()
-      |> IO.inspect(label: "Relations tree")
+    Logger.debug("Relations tree: #{inspect(sel)}")
+
     case sel do
       "$select=" <> rest -> 
         Map.put(query_string_params, "$select", rest)
@@ -152,5 +155,15 @@ defmodule Exoda.Query.Select do
   defp put_selects(%__MODULE__{expands: expands} = result, target, fields) do
     updated_expands = expands |> Enum.map(&put_selects(&1, target, fields))
     %{result | expands: updated_expands}
+  end
+
+  # Check if there is at least one field from the main source
+  defp ensure_at_least_one_main_field_selected!(fields, sources) do
+    if Enum.all?(fields, fn {{_, _, [{:&, _, [idx]}, _]}, _, _} -> idx != 0 end) do
+      {main_source, _} = elem(sources, 0)
+      raise "At least one field from the '#{main_source}' should be selected."
+    else
+      :ok
+    end
   end
 end

@@ -42,7 +42,6 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "filter=(Rating%20ge%204)") -> get_collection_filter_dynamic_fields()
       String.ends_with?(url, "filter=(tolower(Name)%20eq%20'milk')") -> get_collection_filter_fragment()
       String.ends_with?(url, "filter=(contains(ProductDetail/Details,%20'product'))") -> get_collection_filter_join()
-
     end
   end
 
