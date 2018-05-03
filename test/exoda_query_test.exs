@@ -194,21 +194,6 @@ defmodule ExodaQueryTest do
     end)
   end
 
-  @tag :skip
-  test "join with has_one association" do
-    
-  end
-
-  @tag :skip
-  test "join with many_to_many association" do
-    
-  end
-
-  @tag :skip
-  test "join nested associations" do
-    
-  end
-
   test "filter by joined associations" do
     query = from p in Product, 
       join: d in assoc(p, :product_detail), 
@@ -217,8 +202,43 @@ defmodule ExodaQueryTest do
     assert length(products) > 0
   end
 
-  @tag :skip
-  test "order_by option is ordering results" do
+  describe "`order_by` option" do
+    test "with keyword list" do
+      query = from p in Product, order_by: [desc: p.rating, asc: p.price]
+      products = Repo.all(query)
+
+      assert_sort_by_rating_price(products, true)
+    end
+
+    test "with several clauses works as one compound clause" do
+      query = from p in Product, order_by: p.rating, order_by: p.price
+      products = Repo.all(query)
+
+      assert_sort_by_rating_price(products)
+    end
+
+    test "supports atom values" do
+      query = from p in Product, order_by: [:rating, :price]
+      products = Repo.all(query)
+
+      assert_sort_by_rating_price(products)
+    end
+
+    test "supports ordering by associated fields" do
+      #TODO:
+    end
+
+    defp assert_sort_by_rating_price(products, desc_rating \\ false) do
+      ratings = Enum.map(products, &(&1.rating))
+      assert Enum.sort(ratings, fn r1, r2 -> 
+        if desc_rating, do: r1 >= r2, else: r1 <= r2 
+      end) == ratings
+
+      products_by_rating = Enum.chunk_by(products, &(&1.rating))
+      assert Enum.all?(products_by_rating, fn prods ->
+        Enum.sort(prods, &(&1.price <= &2.price)) == prods
+      end)
+    end
   end
 
   @tag :skip
@@ -251,11 +271,6 @@ defmodule ExodaQueryTest do
 
   @tag :skip
   test "preload option loads associations" do
-  end
-
-  @tag :skip
-  test "select works for several sources" do
-    #TODO: select from preloaded association too
   end
 
   @tag :skip
