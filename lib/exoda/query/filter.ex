@@ -97,14 +97,9 @@ defmodule Exoda.Query.Filter do
     Enum.at(context.ecto_params, index)
   end
 
-  # Get field from source schema
-  defp build_filter_expr({{:., [], [{:&, [], [0]}, field_name]}, _, []}, _) do
-    field_name
-  end
-
-  # Get field from joined schemas
-  defp build_filter_expr({{:., [], [{:&, [], [source_idx]}, field_name]}, _, []}, context) do
-    get_assoc_field(context.sources, source_idx, field_name)
+  # Get field from schema
+  defp build_filter_expr({{:., [], [{:&, [], [idx]}, field_name]}, _, []}, context) do
+    Exoda.Query.Field.get_path(context.sources, idx, field_name)
   end
 
   # Type casting is not supported
@@ -158,24 +153,6 @@ defmodule Exoda.Query.Filter do
   defp build_filter_expr(string, _) when is_binary(string), do: "'#{string}'"
   defp build_filter_expr(literal, _), do: literal
 
-
-  # Build full path to the field that is stored in associated entry
-  # Associated entries might be nested, ex.
-  # ```
-  # Advertisements?$filter=startswith(FeaturedProduct/ProductDetail/Details, 'Prod')
-  # ```
-  @spec get_assoc_field(sources, integer, String.t) :: String.t | none
-  defp get_assoc_field(sources, idx, field) do
-    #TODO: validate that join is made through fields that are in assoc
-    {_, source_schema} = elem(sources, 0)
-    {_, target_schema} = elem(sources, idx)
-    case Exoda.Query.Select.find_associations_path(source_schema, target_schema) do
-      [] -> 
-        raise "Association path from #{source_schema} to #{target_schema} is not found"
-      path ->  
-        "#{Enum.join(path, "/")}/#{field}"
-    end
-  end
 
   # Helper to build fragment expression
   @spec build_fragment(Keyword.t, context :: t) :: String.t

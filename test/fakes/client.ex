@@ -43,8 +43,9 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "filter=(Rating%20ge%204)") -> get_collection_filter_dynamic_fields()
       String.ends_with?(url, "filter=(tolower(Name)%20eq%20'milk')") -> get_collection_filter_fragment()
       String.ends_with?(url, "filter=(contains(ProductDetail/Details,%20'product'))") -> get_collection_filter_join()
-      String.ends_with?(url, "orderby=Rating%20desc,Price%20asc") -> get_collection_order_by_rating_desc_price_asc
-      String.ends_with?(url, "orderby=Rating%20asc,Price%20asc") -> get_collection_order_by_rating_asc_price_asc
+      String.ends_with?(url, "orderby=Rating%20desc,Price%20asc") -> get_collection_order_by_rating_desc_price_asc()
+      String.ends_with?(url, "orderby=Rating%20asc,Price%20asc") -> get_collection_order_by_rating_asc_price_asc()
+      String.ends_with?(url, "orderby=ProductDetail/Details%20asc&$select=ID&$expand=ProductDetail($select=Details)") -> get_collection_order_by_assoc()
     end
   end
 
@@ -362,6 +363,16 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/order_by_rating_asc_price_asc.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+  #
+  # Get collection of products: order by product_detail.details asc
+  defp get_collection_order_by_assoc() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/order_by_assoc.json"),
         headers: [],
         status_code: 200
       }}

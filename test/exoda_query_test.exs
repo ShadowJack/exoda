@@ -225,7 +225,14 @@ defmodule ExodaQueryTest do
     end
 
     test "supports ordering by associated fields" do
-      #TODO:
+      query = from p in Product, 
+        join: pd in assoc(p, :product_detail), 
+        select: {p.id, pd.details},
+        order_by: pd.details
+      results = Repo.all(query)
+
+      details = Enum.map(results, fn {_, d} -> d end)
+      assert details == Enum.sort(details)
     end
 
     defp assert_sort_by_rating_price(products, desc_rating \\ false) do

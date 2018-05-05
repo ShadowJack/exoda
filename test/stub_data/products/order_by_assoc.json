@@ -1,0 +1,59 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(ID,ProductDetail,ProductDetail(Details))",
+  "value": [
+    {
+      "ID": 0,
+      "ProductDetail": null
+    },
+    {
+      "ID": 2,
+      "ProductDetail": null
+    },
+    {
+      "ID": 5,
+      "ProductDetail": null
+    },
+    {
+      "ID": 6,
+      "ProductDetail": null
+    },
+    {
+      "ID": 7,
+      "ProductDetail": null
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 9,
+      "ProductDetail": null
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 10,
+      "ProductDetail": null
+    },
+    {
+      "ID": 1,
+      "ProductDetail": {
+        "Details": "Details of product 1"
+      }
+    },
+    {
+      "ID": 3,
+      "ProductDetail": {
+        "Details": "Details of product 3"
+      }
+    },
+    {
+      "ID": 4,
+      "ProductDetail": {
+        "Details": "Details of product 4"
+      }
+    },
+    {
+      "ID": 8,
+      "ProductDetail": {
+        "Details": "Details of product 8"
+      }
+    }
+  ]
+}
