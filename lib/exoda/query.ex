@@ -66,6 +66,7 @@ defmodule Exoda.Query do
       Query select: #{inspect(query.select)}
       Query wheres: #{inspect(query.wheres)}
       Query order_bys: #{inspect(query.order_bys)}
+      Query distinct: #{inspect(query.distinct)}
       """
     )
 
@@ -95,6 +96,7 @@ defmodule Exoda.Query do
       |> Exoda.Query.Select.add_select(query)
       |> Exoda.Query.Filter.add_filter(query, params)
       |> Exoda.Query.OrderBy.add_order_by(query)
+      |> Exoda.Query.Distinct.add_distinct(query)
       |> Enum.map(fn {name, value} -> "#{name}=#{value}" end)
       |> Enum.join("&")
       |> URI.encode()

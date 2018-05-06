@@ -248,8 +248,11 @@ defmodule ExodaQueryTest do
     end
   end
 
-  @tag :skip
-  test "distinct option returns distinct results" do
+  test "`distinct` option is not supported" do
+    assert_raise(RuntimeError, fn -> 
+      query = from p in Product, distinct: true, select: p.rating
+      Repo.all(query)
+    end)
   end
 
   @tag :skip
