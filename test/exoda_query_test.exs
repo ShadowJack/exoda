@@ -293,8 +293,20 @@ defmodule ExodaQueryTest do
     end)
   end
 
-  @tag :skip
   test "offset option skips firts results" do
+    query = from p in Product, 
+      limit: 5, 
+      order_by: p.price 
+    first_page = Repo.all(query)
+
+    query = from p in Product, 
+      limit: 5, 
+      offset: 5, 
+      order_by: p.price 
+    second_page = Repo.all(query)
+
+    assert length(second_page) == 5
+    assert List.last(first_page).price <= List.first(second_page).price
   end
 
   @tag :skip
