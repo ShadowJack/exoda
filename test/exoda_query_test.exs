@@ -266,10 +266,6 @@ defmodule ExodaQueryTest do
     assert hd(products).rating == 1
   end
 
-  @tag :skip
-  test "`last` option returns the last result consideting order by option" do
-  end
-
   describe "`limit` option" do
     test "restricts the number of products returned from the query" do
       query = from p in Product, limit: 2, select: p.id
@@ -290,12 +286,19 @@ defmodule ExodaQueryTest do
     end
   end
 
-  @tag :skip
   test "lock option is not supported" do
+    assert_raise(RuntimeError, fn -> 
+      query = from p in Product, lock: "FOR SHARE NOWAIT"
+      Repo.all(query)
+    end)
   end
 
   @tag :skip
   test "offset option skips firts results" do
+  end
+
+  @tag :skip
+  test "`last` option returns the last result consideting order by option" do
   end
 
   @tag :skip
