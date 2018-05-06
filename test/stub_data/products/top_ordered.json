@@ -1,0 +1,12 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(Rating)",
+  "value": [
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "Rating": 1
+    },
+    {
+      "Rating": 3
+    }
+  ]
+}
