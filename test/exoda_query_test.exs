@@ -256,11 +256,14 @@ defmodule ExodaQueryTest do
   end
 
   @tag :skip
-  test "`first` option returns the first result consideting order by option" do
+  test "group_by option is not supported" do
   end
 
-  @tag :skip
-  test "group_by option is not supported" do
+  test "`first` option returns the first result" do
+    products = Product |> first(:rating) |> Repo.all()
+
+    assert length(products) == 1
+    assert hd(products).rating == 1
   end
 
   @tag :skip

@@ -1,0 +1,15 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products",
+  "value": [
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 10,
+      "Name": "Coffee",
+      "Description": "Bulk size can of instant coffee",
+      "ReleaseDate": "1982-12-31T00:00:00Z",
+      "DiscontinuedDate": null,
+      "Rating": 1,
+      "Price": 6.99
+    }
+  ]
+}

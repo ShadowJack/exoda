@@ -48,6 +48,7 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "orderby=ProductDetail/Details%20asc&$select=ID&$expand=ProductDetail($select=Details)") -> get_collection_order_by_assoc()
       String.ends_with?(url, "select=ID&$top=2") -> get_collection_top()
       String.ends_with?(url, "orderby=Rating%20asc&$select=Rating&$top=2") -> get_collection_top_ordered()
+      String.ends_with?(url, "orderby=Rating%20asc&$top=1") -> get_collection_first()
     end
   end
 
@@ -395,6 +396,16 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/top_ordered.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+
+  # Get collection of products: only first result ordered by rating
+  defp get_collection_first() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/first.json"),
         headers: [],
         status_code: 200
       }}
