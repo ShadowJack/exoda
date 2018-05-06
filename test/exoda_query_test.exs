@@ -267,8 +267,11 @@ defmodule ExodaQueryTest do
   test "`last` option returns the last result consideting order by option" do
   end
 
-  @tag :skip
-  test "limit option limits number of products returned from the query" do
+  test "`limit` option restricts the number of products returned from the query" do
+    query = from p in Product, limit: 2, select: p.id
+    products = Repo.all(query)
+
+    assert length(products) == 2
   end
 
   @tag :skip

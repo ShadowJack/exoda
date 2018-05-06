@@ -1,0 +1,11 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(ID)",
+  "value": [
+    {
+      "ID": 0
+    },
+    {
+      "ID": 1
+    }
+  ]
+}

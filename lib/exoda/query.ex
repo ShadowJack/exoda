@@ -97,6 +97,7 @@ defmodule Exoda.Query do
       |> Exoda.Query.Filter.add_filter(query, params)
       |> Exoda.Query.OrderBy.add_order_by(query)
       |> Exoda.Query.Distinct.add_distinct(query)
+      |> Exoda.Query.Top.add_top(query)
       |> Enum.map(fn {name, value} -> "#{name}=#{value}" end)
       |> Enum.join("&")
       |> URI.encode()

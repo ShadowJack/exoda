@@ -46,6 +46,7 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "orderby=Rating%20desc,Price%20asc") -> get_collection_order_by_rating_desc_price_asc()
       String.ends_with?(url, "orderby=Rating%20asc,Price%20asc") -> get_collection_order_by_rating_asc_price_asc()
       String.ends_with?(url, "orderby=ProductDetail/Details%20asc&$select=ID&$expand=ProductDetail($select=Details)") -> get_collection_order_by_assoc()
+      String.ends_with?(url, "select=ID&$top=2") -> get_collection_top()
     end
   end
 
@@ -367,12 +368,22 @@ defmodule Exoda.Fakes.Client do
         status_code: 200
       }}
   end
-  #
+
   # Get collection of products: order by product_detail.details asc
   defp get_collection_order_by_assoc() do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/order_by_assoc.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+
+  # Get collection of products: only top 2 results
+  defp get_collection_top() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/top.json"),
         headers: [],
         status_code: 200
       }}
