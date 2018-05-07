@@ -51,6 +51,8 @@ defmodule Exoda.Fakes.Client do
       String.ends_with?(url, "orderby=Rating%20asc&$top=1") -> get_collection_first()
       String.ends_with?(url, "orderby=Price%20asc&$top=5") -> get_collection_first_page()
       String.ends_with?(url, "orderby=Price%20asc&$skip=5&$top=5") -> get_collection_second_page()
+      String.ends_with?(url, "orderby=ID%20desc&$top=1") -> get_collection_last_unordered()
+      String.ends_with?(url, "orderby=Price%20desc&$top=1") -> get_collection_last_ordered()
     end
   end
 
@@ -428,6 +430,26 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/second_page.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+
+  # Get the last product without ordering
+  defp get_collection_last_unordered() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/last_unordered.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+
+  # Get the last product ordered by price
+  defp get_collection_last_ordered() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/last_ordered.json"),
         headers: [],
         status_code: 200
       }}

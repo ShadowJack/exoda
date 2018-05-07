@@ -260,10 +260,10 @@ defmodule ExodaQueryTest do
   end
 
   test "`first` option returns the first result" do
-    products = Product |> first(:rating) |> Repo.all()
+    products = Product |> Repo.all()
+    first_product = Product |> first(:rating) |> Repo.one()
 
-    assert length(products) == 1
-    assert hd(products).rating == 1
+    assert Enum.all?(products, fn p -> p.rating >= first_product.rating end)
   end
 
   describe "`limit` option" do
@@ -309,8 +309,20 @@ defmodule ExodaQueryTest do
     assert List.last(first_page).price <= List.first(second_page).price
   end
 
-  @tag :skip
-  test "`last` option returns the last result consideting order by option" do
+  describe "`last` option" do
+    test "when order_by is not present returns the entry with biggest primary key" do
+      products = Product |> Repo.all()
+      last_product = Product |> last() |> Repo.one()
+
+      assert List.last(products) == last_product
+    end
+
+    test "returns the last result taking into account order_by option" do
+      products = Product |> Repo.all()
+      last_product = Product |> last(:price) |> Repo.one()
+
+      assert Enum.all?(products, fn p -> p.price <= last_product.price end)
+    end
   end
 
   @tag :skip

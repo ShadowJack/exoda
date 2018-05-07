@@ -68,7 +68,7 @@ defmodule Exoda.Query do
       Query order_bys: #{inspect(query.order_bys)}
       Query distinct: #{inspect(query.distinct)}
       Query limit: #{inspect(query.limit)}
-      Query offset: #{inspect(query.limit)}
+      Query offset: #{inspect(query.offset)}
       """
     )
 
@@ -95,13 +95,13 @@ defmodule Exoda.Query do
   def build_query_string(query, params) do
     query_string = 
       Map.new()
+      |> Exoda.Query.Unsupported.add_distinct(query)
+      |> Exoda.Query.Unsupported.add_lock(query)
       |> Exoda.Query.Select.add_select(query)
       |> Exoda.Query.Filter.add_filter(query, params)
       |> Exoda.Query.OrderBy.add_order_by(query)
       |> Exoda.Query.Top.add_top(query)
       |> Exoda.Query.Skip.add_skip(query)
-      |> Exoda.Query.Unsupported.add_distinct(query)
-      |> Exoda.Query.Unsupported.add_lock(query)
       |> Enum.map(fn {name, value} -> "#{name}=#{value}" end)
       |> Enum.join("&")
       |> URI.encode()
