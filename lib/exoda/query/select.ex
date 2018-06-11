@@ -122,9 +122,19 @@ defmodule Exoda.Query.Select do
 
     # add selects
     curr_fields = 
-      fields 
-      |> Enum.map(fn {{:., _, [{:&, _, [idx]}, field_name]}, _, _} -> {idx, field_name} end)
-      |> Enum.filter(fn {idx, _} -> Enum.at(sources, idx) == curr_schema end)
+      fields
+      |> Enum.map(fn 
+        {{:., _, [{:&, _, [idx]}, field_name]}, _, _} -> {idx, field_name} 
+        {:count, _, [{{:., _, [{:&, _, [idx]}, _]}, _, _}]} -> {idx, "$count=true"}
+      end
+      )
+      |> Enum.filter(fn 
+        {0, "$count=true"} -> 
+          # ignore $count for the main entity because it's handled separately
+          false
+        {idx, _} -> 
+          Enum.at(sources, idx) == curr_schema 
+      end)
       |> Enum.map(fn {_, field_name} -> field_name end)
     updated_result = put_selects(updated_result, curr_schema, curr_fields)
 
@@ -166,7 +176,11 @@ defmodule Exoda.Query.Select do
 
   # Check if there is at least one field from the main source
   defp ensure_at_least_one_main_field_selected!(fields, sources) do
-    if Enum.all?(fields, fn {{_, _, [{:&, _, [idx]}, _]}, _, _} -> idx != 0 end) do
+    Logger.info("Fields: #{inspect(fields)}")
+    if Enum.all?(fields, fn 
+      {{_, _, [{:&, _, [idx]}, _]}, _, _} -> idx != 0 
+      {_, _, [{{:., _, [{:&, _, [idx]}, _]}, _, _}]} -> idx != 0
+    end) do
       {main_source, _} = elem(sources, 0)
       raise "At least one field from the '#{main_source}' should be selected."
     else

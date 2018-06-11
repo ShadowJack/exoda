@@ -20,6 +20,8 @@ defmodule Exoda.Fakes.Client do
   def get(url, _ \\ [], _ \\ []) do
     Logger.info("Url requested: #{url}")
     cond do
+      String.ends_with?(url, "count=true") -> get_collection_count()
+      String.ends_with?(url, "count=true&$select=ID") -> get_collection_count()
       String.ends_with?(url, "select=Name") -> get_collection_select_name()
       String.ends_with?(url, "select=Name,Price") -> get_collection_select_name_price()
       String.ends_with?(url, "select=Name,Rating") -> get_collection_select_name_rating()
@@ -450,6 +452,16 @@ defmodule Exoda.Fakes.Client do
     {:ok,
       %HTTPoison.Response{
         body: File.read!("test/stub_data/products/last_ordered.json"),
+        headers: [],
+        status_code: 200
+      }}
+  end
+
+  # Get the count of items in collection
+  defp get_collection_count() do
+    {:ok,
+      %HTTPoison.Response{
+        body: File.read!("test/stub_data/products/count.json"),
         headers: [],
         status_code: 200
       }}

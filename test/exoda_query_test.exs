@@ -74,6 +74,45 @@ defmodule ExodaQueryTest do
       # inside the fake http client
       assert length(results) > 0
     end
+
+  end
+
+  describe "aggregation functions:" do
+    #TODO: $count doesn't take into account $skip and $top options
+    # it returns total number of results.
+    # This should be documented
+    test "`count/1` counts the given entry" do
+      query = from p in Product, select: {p.id, count(p.id)}
+      assert {_id, 11} = Repo.all(query) |> List.first()
+    end
+    
+    @tag :skip
+    test "`count/2` is not supported" do
+      assert_raise(RuntimeError, fn -> 
+        (from p in Post, select: count(p.id, :distinct))
+        |> Repo.all()
+      end)
+    end
+
+    @tag :skip
+    test "`max` calculates the maximum for the given entry" do
+      # not supported
+    end
+
+    @tag :skip
+    test "`min` calculates the minimum for the given entry" do
+      # not supported
+    end
+
+    @tag :skip
+    test "`avg` calculates the average for the given entry" do
+      # not supported
+    end
+
+    @tag :skip
+    test "`sum` calculates the sum for the given entry" do
+      # not supported
+    end
   end
 
   describe "$where option" do

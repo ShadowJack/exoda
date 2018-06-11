@@ -1,0 +1,41 @@
+{
+  "@odata.context": "http://services.odata.org/V4/OData/(S(1ldwlff3vlwnnll4udpfi4uj))/OData.svc/$metadata#Products(ID)",
+  "@odata.count": 11,
+  "value": [
+    {
+      "ID": 0
+    },
+    {
+      "ID": 1
+    },
+    {
+      "ID": 2
+    },
+    {
+      "ID": 3
+    },
+    {
+      "ID": 4
+    },
+    {
+      "ID": 5
+    },
+    {
+      "ID": 6
+    },
+    {
+      "ID": 7
+    },
+    {
+      "ID": 8
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 9
+    },
+    {
+      "@odata.type": "#ODataDemo.FeaturedProduct",
+      "ID": 10
+    }
+  ]
+}

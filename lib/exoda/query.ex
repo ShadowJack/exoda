@@ -102,6 +102,7 @@ defmodule Exoda.Query do
       |> Exoda.Query.OrderBy.add_order_by(query)
       |> Exoda.Query.Top.add_top(query)
       |> Exoda.Query.Skip.add_skip(query)
+      |> Exoda.Query.Count.add_count(query)
       |> Enum.map(fn {name, value} -> "#{name}=#{value}" end)
       |> Enum.join("&")
       |> URI.encode()
@@ -127,43 +128,73 @@ defmodule Exoda.Query do
   end
   defp parse_response(%HTTPoison.Response{status_code: 200, body: body}, process, query) do
     case Jason.decode(body) do
-      {:ok, %{"value" => items }} ->
+      {:ok, %{"value" => items } = parsed_body} ->
         results = 
           items 
           |> Enum.map(fn item ->
             item 
-            |> preprocess_response(query) 
+            |> preprocess_response(query, parsed_body) 
             |> process.()
           end)
 
           {length(results), results}
       {:error, reason} ->
-        Logger.error("Error fetching data from remote OData server: #{reason}")
+        Logger.error("Error fetching data from remote OData server: #{inspect(reason)}")
         {0, []}
     end
   end
 
   # order fields, extract values and add metadata if required
-  # TODO: support multiple sources
-  @spec preprocess_response(Map.t, query) :: List.t
-  defp preprocess_response(item, %Query{select: select}) do
-    item = if Enum.any?(select.fields, fn {{_, _, [_, f]}, _, _} -> f == "@odata.type" end) do
-      Map.put_new(item, "@odata.type", "")
-    else
-      item
-    end
-
-    item 
+  @spec preprocess_response(Map.t, query, Map.t) :: List.t
+  defp preprocess_response(item, %Query{select: select}, full_body) do
+    item
+    |> add_odata_type_value(select.fields)
+    |> add_count_value(select.fields, Map.get(full_body, "@odata.count"))
     |> Map.to_list() 
     |> sort_fields(select.fields)
     |> Enum.map(fn {_, value} -> value end)
   end
-  defp preprocess_response(item, _query), do: item
+  defp preprocess_response(item, _query, _), do: item
+
+  @spec add_odata_type_value(Map.t, []) :: Map.t
+  defp add_odata_type_value(item, fields) do
+    has_odata_type = Enum.any?(fields, fn field ->
+      case field do
+        {{_, _, [_, "@odata.type"]}, _, _} -> true
+        _ -> false
+      end 
+    end)
+
+    if has_odata_type do
+      Map.put_new(item, "@odata.type", "")
+    else
+      item
+    end
+  end
+
+  @spec add_count_value(Map.t, [], String.t) :: Map.t
+  defp add_count_value(item, fields, count_value) do
+    has_count = Enum.any?(fields, fn field ->
+      case field do
+        {:count, _, _} -> true
+        _ -> false
+      end 
+    end)
+
+    if has_count do
+      Map.put_new(item, "@odata.count", count_value)
+    else
+      item
+    end
+  end
 
   @spec sort_fields([any], []) :: [any]
   defp sort_fields(values, fields) do
-    Enum.map(fields, fn {{_, _, [_, field_source]}, _, _} -> 
-      Enum.find(values, {field_source, nil}, fn {name, _} -> name == field_source end)
+    Enum.map(fields, fn 
+      {{_, _, [_, field_source]}, _, _} -> 
+        Enum.find(values, {field_source, nil}, fn {name, _} -> name == field_source end)
+      {:count, _, _} -> 
+        Enum.find(values, {"@odata.count", nil}, fn {name, _} -> name == "@odata.count" end)
     end)
   end
 end
